@@ -16,14 +16,34 @@ export const WorkoutPrograms = [
       },
       {
         label: "Strength",
-        duration: 35 * 60,
-        exercises: [
-          { name: "Pull-up", duration: 40 },
-          { name: "Bear Hug Galon Squat", duration: 40 },
-          { name: "TRX Split Squat / Single-Leg Squat", duration: 40 },
-          { name: "Hindu + Tyson Push-up", duration: 40 },
-          { name: "Overhead Press Galon (Strict)", duration: 40 },
-          { name: "Band Woodchop / Twist Galon", duration: 40 }
+        supersets: [
+          {
+            name: "A",
+            sets: 4,
+            restBetweenSets: 75, // seconds
+            exercises: [
+              { name: "Pull-up", duration: 3 },
+              { name: "Bear Hug Galon Squat", duration: 40 }
+            ]
+          },
+          {
+            name: "B",
+            sets: 3,
+            restBetweenSets: 75,
+            exercises: [
+              { name: "TRX Split Squat", duration: 40 },
+              { name: "Hindu + Tyson Push-up", duration: 40 }
+            ]
+          },
+          {
+            name: "C",
+            sets: 3,
+            restBetweenSets: 75,
+            exercises: [
+              { name: "Overhead Press Galon", duration: 40 },
+              { name: "Band Woodchop", duration: 40 }
+            ]
+          }
         ]
       },
       {
