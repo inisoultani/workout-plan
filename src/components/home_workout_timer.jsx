@@ -47,6 +47,11 @@ export default function HomeWorkoutTimer() {
     setRunning(true);
   };
 
+  const resetCurrentExercise = () => {
+    setSeconds(workoutPhases[phaseIndex].exercises[exerciseIndex].duration);
+    setRunning(true);
+  };
+
   const skipToNext = () => {
     const nextExerciseIndex = exerciseIndex + 1;
     const nextPhaseIndex = phaseIndex + 1;
@@ -95,6 +100,7 @@ export default function HomeWorkoutTimer() {
 
       <div className="flex gap-4">
         <Button onClick={() => setRunning(!running)}>{running ? "Pause" : "Resume"}</Button>
+        <Button onClick={resetCurrentExercise}>Reset Movement</Button>
         <Button onClick={restart}>Restart</Button>
         <Button onClick={() => setRunning(false)}>Finish</Button>
         <Button onClick={skipToNext}>Next Movement</Button>
