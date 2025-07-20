@@ -113,37 +113,25 @@ export default function HomeWorkoutTimer() {
     }, 1000);
 
     return () => clearInterval(timerRef.current);
-  }, [running, phaseIndex, exerciseIndex]);
+  }, [running, phaseIndex, supersetIndex, setCount, exerciseIndex]);
 
   const restart = () => {
     setPhaseIndex(0);
     setSupersetIndex(0);
     setSetCount(1);
     setExerciseIndex(0);
+    elapsedSeconds.current = 0;
     setSeconds(getInitialSeconds(0, 0, 0, 1));
     setRunning(true);
   };
 
   const resetCurrentExercise = () => {
-    setSeconds(workoutPhases[phaseIndex].exercises[exerciseIndex].duration);
+    setSeconds(getInitialSeconds(phaseIndex, supersetIndex, exerciseIndex, setCount));
     setRunning(true);
   };
 
   const skipToNext = () => {
-    const nextExerciseIndex = exerciseIndex + 1;
-    const nextPhaseIndex = phaseIndex + 1;
-
-    if (nextExerciseIndex < workoutPhases[phaseIndex].exercises.length) {
-      setExerciseIndex(nextExerciseIndex);
-      setSeconds(workoutPhases[phaseIndex].exercises[nextExerciseIndex].duration);
-    } else if (nextPhaseIndex < workoutPhases.length) {
-      setPhaseIndex(nextPhaseIndex);
-      setExerciseIndex(0);
-      setSeconds(workoutPhases[nextPhaseIndex].exercises[0].duration);
-    } else {
-      setRunning(false);
-      setSeconds(0);
-    }
+    setSeconds(0);
   };
 
   const currentPhase = workoutPhases[phaseIndex];
