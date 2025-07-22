@@ -17,8 +17,11 @@ export default function HomeWorkoutTimer() {
   const [running, setRunning] = useState(true);
   const [isResting, setIsResting] = useState(false);
   const [restType, setRestType] = useState(null);
-  const [resumeSeconds, setResumeSeconds] = useState(null);
   const [nextAfterRest, setNextAfterRest] = useState(null);
+
+  const defaultRestBetweenExerciseInSet = 7;
+  const defaultRestBetweenExercise = 7;
+  const defaultRestBetweenSet = 7;
 
   const timerRef = useRef(null);
   
@@ -98,7 +101,7 @@ export default function HomeWorkoutTimer() {
               exerciseIndex: nextExerciseIndex,
               resume: currentSuperset.exercises[nextExerciseIndex].duration,
             });
-            return currentSuperset.restBetweenExercise ?? 3;
+            return currentSuperset.restBetweenExercise ?? defaultRestBetweenExerciseInSet;
             //return currentSuperset.exercises[nextExerciseIndex].duration;
           }
 
@@ -115,7 +118,7 @@ export default function HomeWorkoutTimer() {
                 exerciseIndex: nextExerciseIndex,
                 resume: currentSuperset.exercises[0].duration,
               });
-            return currentSuperset.restBetweenSets ?? 7;
+            return currentSuperset.restBetweenSets ?? defaultRestBetweenSet;
             //return currentSuperset.exercises[0].duration;
           }
 
@@ -149,9 +152,7 @@ export default function HomeWorkoutTimer() {
                 exerciseIndex: nextExerciseIndex,
                 resume: currentPhase.exercises[nextExerciseIndex].duration,
               });
-              //setResumeSeconds(currentPhase.exercises[nextExerciseIndex].duration);
-              return currentPhase.restBetweenExercise ?? 10;
-              //return currentPhase.exercises[nextExerciseIndex].duration;
+              return currentPhase.restBetweenExercise ?? defaultRestBetweenExercise;
             }
 
             const nextPhaseIndex = phaseIndex + 1;
@@ -262,7 +263,7 @@ export default function HomeWorkoutTimer() {
       if (restType === "betweenSet") {
         return currentPhase.supersets?.[supersetIndex]?.restBetweenSets ?? 0;
       } else {
-        return currentPhase.supersets?.[supersetIndex]?.restBetweenExercise ?? 3;
+        return currentPhase.supersets?.[supersetIndex]?.restBetweenExercise ?? defaultRestBetweenExerciseInSet;
       }
     } else {
       if (restType === "betweenExercise") {

@@ -22,6 +22,7 @@ export const WorkoutPrograms = [
             name: "A",
             sets: 4,
             restBetweenSets: 2, // seconds
+            restBetweenExercise: 5,
             exercises: [
               { name: "Pull-up", duration: 3 },
               { name: "Bear Hug Galon Squat", duration: 3 }
