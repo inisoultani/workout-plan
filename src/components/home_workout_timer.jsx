@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { ProgressBarWithText } from "@/components/ui/progress-with-text";
 import { WorkoutPrograms } from "@/data/workouts";
 
 const workoutPhases = WorkoutPrograms.find(program => program.day == "Sunday").phases;
@@ -186,6 +187,8 @@ export default function HomeWorkoutTimer() {
     setSupersetIndex(0);
     setSetCount(1);
     setExerciseIndex(0);
+    setRestType(null);
+    setIsResting(false);
     elapsedSeconds.current = 0;
     setSeconds(getInitialSeconds(0, 0, 0, 1));
     setRunning(true);
@@ -308,14 +311,18 @@ export default function HomeWorkoutTimer() {
       ) : (
         <>
           <h2 className="text-3xl font-bold">{currentExercise.name}</h2>
-          <Progress value={((currentExercise.duration - seconds) / currentExercise.duration) * 100} className="w-full h-4 bg-green-800 mb-2" />
+          {/* <Progress value={((currentExercise.duration - seconds) / currentExercise.duration) * 100} className="w-full h-4 bg-green-800 mb-2" /> */}
+          <ProgressBarWithText value={((currentExercise.duration - seconds) / currentExercise.duration) * 100} textValue={`Loading...`} className="w-full h-5 bg-green-800 mb-2" />
         </>
       )}
 
        
-      <Progress value={((exerciseIndex + 1) / (isSupersetPhase(currentPhase) ? currentPhase.supersets[supersetIndex].exercises.length : currentPhase.exercises.length)) * 100} className="w-full h-4 bg-blue-800 mb-2" />
-      <Progress value={(elapsedSeconds.current / totalSeconds) * 100} className="w-full h-4 bg-purple-800 mb-6" />
+      {/* <Progress value={((exerciseIndex + 1) / (isSupersetPhase(currentPhase) ? currentPhase.supersets[supersetIndex].exercises.length : currentPhase.exercises.length)) * 100} className="w-full h-4 bg-blue-800 mb-2" /> */}
+      <ProgressBarWithText value={((exerciseIndex + 1) / (isSupersetPhase(currentPhase) ? currentPhase.supersets[supersetIndex].exercises.length : currentPhase.exercises.length)) * 100}  textValue={`Loading...`} className="w-full h-5 bg-blue-800 mb-2" />
+      {/* <Progress value={(elapsedSeconds.current / totalSeconds) * 100} className="w-full h-4 bg-purple-800 mb-2" /> */}
+      <ProgressBarWithText value={(elapsedSeconds.current / totalSeconds) * 100} textValue={`Loading...`} className="w-full h-5 bg-purple-800 mb-6" />
 
+      
       <div className="flex gap-4">
         <Button onClick={() => setRunning(!running)}>{running ? "Pause" : "Resume"}</Button>
         <Button onClick={resetCurrentExercise}>Reset Movement</Button>

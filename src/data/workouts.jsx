@@ -6,26 +6,36 @@ export const WorkoutPrograms = [
       {
         label: "Warm-Up",
         duration: 10 * 60,
-        restBetweenExercise: 3,
+        restBetweenExercise: 60,
         exercises: [
-          { name: "Jump rope", duration: 5 * 1 },
-          { name: "Arm circle + shoulder roll", duration: 3 },
-          // { name: "World’s Greatest Stretch", duration: 3 },
-          // { name: "TRX scapular pull", duration: 3 },
-          // { name: "Bear Crawl maju-mundur", duration: 3 }
+          { name: "Jump rope", duration: 3 * 60 },
+          { name: "Arm circle + shoulder roll", duration: 60 },
+          // { name: "World’s Greatest Stretch", duration: 40 },
+          // { name: "TRX scapular pull", duration: 50 },
+          // { name: "Bear Crawl maju-mundur", duration: 50 }
         ]
       },
       {
         label: "Strength",
         supersets: [
           {
-            name: "A",
-            sets: 2,
-            restBetweenSets: 2, // seconds
-            restBetweenExercise: 5,
+            name: "Z",
+            sets: 3,
+            restBetweenSets: 20, // seconds
+            restBetweenExercise: 20,
             exercises: [
-              { name: "Pull-up", duration: 3 },
-              { name: "Bear Hug Galon Squat", duration: 3 }
+              { name: "Galon Rowing 10 each side", duration: 120 },
+              { name: "TRX Split Squat", duration: 50 }
+            ]
+          },
+          {
+            name: "A",
+            sets: 3,
+            restBetweenSets: 20, // seconds
+            restBetweenExercise: 20,
+            exercises: [
+              { name: "Pull-up", duration: 50 },
+              { name: "Bear Hug Galon Squat", duration: 50 }
             ]
           },
           {
