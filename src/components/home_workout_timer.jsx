@@ -27,7 +27,7 @@ export default function HomeWorkoutTimer() {
   const timerRef = useRef(null);
   
 
-  function getInitialSeconds(phaseIdx, supersetIdx, exerciseIdx) {
+  function getInitialSeconds(phaseIdx, supersetIdx, exerciseIdx, setCount = 1) {
     const phase = workoutPhases[phaseIdx];
     if (isSupersetPhase(phase)) {
       return phase.supersets[supersetIdx].exercises[exerciseIdx].duration;
@@ -53,6 +53,8 @@ export default function HomeWorkoutTimer() {
       phase.exercises.reduce((eTotal, e) => eTotal + e.duration, 0)
     );
   }, 0);
+  console.log("Total seconds of workout", totalSeconds);
+
 
   const elapsedSeconds = useRef(0);
 
@@ -62,7 +64,11 @@ export default function HomeWorkoutTimer() {
 
     timerRef.current = setInterval(() => {
       setSeconds((s) => {
-        if (s > 1) return s - 1;
+        //if (s > 1) return s - 1;
+        if (s > 0) {
+          elapsedSeconds.current += 1; // <-- Track time
+          return s - 1;
+        }
 
         // === Handle end of rest period ===
         if (isResting) {
@@ -200,7 +206,15 @@ export default function HomeWorkoutTimer() {
   };
 
   const skipToNext = () => {
+    console.log("Before skip", {
+      seconds,
+      elapsedBefore: elapsedSeconds.current,
+    });
+    elapsedSeconds.current += seconds;
     setSeconds(0);
+    console.log("After skip", {
+      elapsedAfter: elapsedSeconds.current,
+    });
   };
 
   const goToPrevious = () => {
