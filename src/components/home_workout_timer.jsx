@@ -260,13 +260,13 @@ export default function HomeWorkoutTimer() {
 
     if(isSupersetPhase(currentPhase)) {
       if (restType === "betweenSet") {
-        return currentPhase.supersets?.[supersetIndex]?.restBetweenSets ?? 0;
+        return currentPhase.supersets?.[supersetIndex]?.restBetweenSets ?? defaultRestBetweenSet;
       } else {
         return currentPhase.supersets?.[supersetIndex]?.restBetweenExercise ?? defaultRestBetweenExerciseInSet;
       }
     } else {
       if (restType === "betweenExercise") {
-        return currentPhase.restBetweenExercise ?? 0;
+        return currentPhase.restBetweenExercise ?? defaultRestBetweenExercise;
       }
     }
     return 0;
