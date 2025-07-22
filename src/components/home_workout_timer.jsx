@@ -15,6 +15,11 @@ export default function HomeWorkoutTimer() {
     getInitialSeconds(0, 0, 0)
   );
   const [running, setRunning] = useState(true);
+  const [isResting, setIsResting] = useState(false);
+  const [restType, setRestType] = useState(null);
+  const [resumeSeconds, setResumeSeconds] = useState(null);
+  const [nextAfterRest, setNextAfterRest] = useState(null);
+
   const timerRef = useRef(null);
   
 
@@ -55,21 +60,63 @@ export default function HomeWorkoutTimer() {
       setSeconds((s) => {
         if (s > 1) return s - 1;
 
+        // === Handle end of rest period ===
+        if (isResting) {
+          
+          setIsResting(false);
+          setRestType(null);
+          // Resume workout timer where you left off (which was already set in state)
+          // Handle what to do after rest
+          if (nextAfterRest?.type === "exercise") {
+            setExerciseIndex(nextAfterRest.exerciseIndex);
+          } else if (nextAfterRest?.type === "set") {
+            setSetCount(nextAfterRest.setCount);
+            setExerciseIndex(0);
+          } else if (nextAfterRest?.type === "superset") {
+            setSupersetIndex(nextAfterRest.supersetIndex);
+            setSetCount(1);
+            setExerciseIndex(0);
+          }
+          const resume = nextAfterRest?.resume ?? 0;
+          setNextAfterRest(null);
+          return resume; // Timer will re-trigger next tick
+        }
+        
+
         const currentPhase = workoutPhases[phaseIndex];
         if (isSupersetPhase(currentPhase)) {
           const currentSuperset = currentPhase.supersets[supersetIndex];
           const nextExerciseIndex = exerciseIndex + 1;
 
+          // === BETWEEN EXERCISE ===
           if (nextExerciseIndex < currentSuperset.exercises.length) {
             setExerciseIndex(nextExerciseIndex);
-            return currentSuperset.exercises[nextExerciseIndex].duration;
+            setIsResting(true);
+            setRestType("betweenExercise");
+            setNextAfterRest({
+              type: "exercise",
+              exerciseIndex: nextExerciseIndex,
+              resume: currentSuperset.exercises[nextExerciseIndex].duration,
+            });
+            return currentSuperset.restBetweenExercise ?? 3;
+            //return currentSuperset.exercises[nextExerciseIndex].duration;
           }
 
           const nextSetCount = setCount + 1;
           if (nextSetCount <= currentSuperset.sets) {
             setExerciseIndex(0);
             setSetCount(nextSetCount);
-            return currentSuperset.exercises[0].duration;
+            setIsResting(true);
+            setRestType("betweenSet");
+            //setResumeSeconds(currentSuperset.exercises[0].duration);
+            setNextAfterRest({
+                type: "set",
+                setCount: nextSetCount,
+                exerciseIndex: nextExerciseIndex,
+                resume: currentSuperset.exercises[0].duration,
+              });
+            return currentSuperset.restBetweenSets ?? 7;
+            //return currentSuperset.exercises[0].duration;
           }
 
           const nextSupersetIndex = supersetIndex + 1;
@@ -95,7 +142,16 @@ export default function HomeWorkoutTimer() {
             const nextExerciseIndex = exerciseIndex + 1;
             if (nextExerciseIndex < currentPhase.exercises.length) {
               setExerciseIndex(nextExerciseIndex);
-              return currentPhase.exercises[nextExerciseIndex].duration;
+              setIsResting(true);
+              setRestType("betweenExercise");
+              setNextAfterRest({
+                type: "exercise",
+                exerciseIndex: nextExerciseIndex,
+                resume: currentPhase.exercises[nextExerciseIndex].duration,
+              });
+              //setResumeSeconds(currentPhase.exercises[nextExerciseIndex].duration);
+              return currentPhase.restBetweenExercise ?? 10;
+              //return currentPhase.exercises[nextExerciseIndex].duration;
             }
 
             const nextPhaseIndex = phaseIndex + 1;
@@ -113,7 +169,7 @@ export default function HomeWorkoutTimer() {
     }, 1000);
 
     return () => clearInterval(timerRef.current);
-  }, [running, phaseIndex, supersetIndex, setCount, exerciseIndex]);
+  }, [running, phaseIndex, supersetIndex, setCount, exerciseIndex, isResting, restType]);
 
   const restart = () => {
     setPhaseIndex(0);
@@ -198,6 +254,23 @@ export default function HomeWorkoutTimer() {
     }
   };
 
+  const getRestDuration = () => {
+    if (!isResting) return 0;
+    const currentPhase = workoutPhases[phaseIndex];
+
+    if(isSupersetPhase(currentPhase)) {
+      if (restType === "betweenSet") {
+        return currentPhase.supersets?.[supersetIndex]?.restBetweenSets ?? 0;
+      } else {
+        return currentPhase.supersets?.[supersetIndex]?.restBetweenExercise ?? 3;
+      }
+    } else {
+      if (restType === "betweenExercise") {
+        return currentPhase.restBetweenExercise ?? 0;
+      }
+    }
+    return 0;
+  };
 
   const currentPhase = workoutPhases[phaseIndex];
   const currentExercise = isSupersetPhase(currentPhase)
@@ -216,7 +289,20 @@ export default function HomeWorkoutTimer() {
       )}
       <div className="text-7xl font-mono mb-4">{seconds}s</div>
 
-      <Progress value={((currentExercise.duration - seconds) / currentExercise.duration) * 100} className="w-full h-4 bg-green-800 mb-2" />
+     
+      {isResting ? (
+        <>
+          <h2 className="text-3xl font-bold text-yellow-400 mb-2">{restType === "betweenSet" ? <div>Rest Between Sets</div> : <div>Rest Between Exercise</div>}</h2>
+          <Progress value={((getRestDuration() - seconds) / getRestDuration()) * 100} className="w-full h-4 bg-yellow-800 mb-6" />
+        </>
+      ) : (
+        <>
+          <h2 className="text-3xl font-bold">{currentExercise.name}</h2>
+          <Progress value={((currentExercise.duration - seconds) / currentExercise.duration) * 100} className="w-full h-4 bg-green-800 mb-2" />
+        </>
+      )}
+
+       
       <Progress value={((exerciseIndex + 1) / (isSupersetPhase(currentPhase) ? currentPhase.supersets[supersetIndex].exercises.length : currentPhase.exercises.length)) * 100} className="w-full h-4 bg-blue-800 mb-2" />
       <Progress value={(elapsedSeconds.current / totalSeconds) * 100} className="w-full h-4 bg-purple-800 mb-6" />
 
