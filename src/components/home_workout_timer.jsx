@@ -112,20 +112,30 @@ export default function HomeWorkoutTimer() {
             setIsResting(true);
             setRestType("betweenSet");
             setNextAfterRest({
-                type: "set",
-                setCount: nextSetCount,
-                exerciseIndex: nextExerciseIndex,
-                resume: currentSuperset.exercises[0].duration,
-              });
+              type: "set",
+              setCount: nextSetCount,
+              exerciseIndex: nextExerciseIndex,
+              resume: currentSuperset.exercises[0].duration,
+            });
             return currentSuperset.restBetweenSets ?? defaultRestBetweenSet;
           }
 
+          // === BETWEEN SUPERSET ===
           const nextSupersetIndex = supersetIndex + 1;
           if (nextSupersetIndex < currentPhase.supersets.length) {
             setSupersetIndex(nextSupersetIndex);
             setExerciseIndex(0);
             setSetCount(1);
-            return currentPhase.supersets[nextSupersetIndex].exercises[0].duration;
+            setIsResting(true);
+            setRestType("betweenSet");
+            setNextAfterRest({
+              type: "superset",
+              supersetIndex: nextSupersetIndex,
+              exerciseIndex: 0,
+              resume: currentPhase.supersets[nextSupersetIndex].exercises[0].duration,
+            });
+            return currentSuperset.restBetweenSets ?? defaultRestBetweenSet;
+            //return currentPhase.supersets[nextSupersetIndex].exercises[0].duration;
           }
 
           const nextPhaseIndex = phaseIndex + 1;

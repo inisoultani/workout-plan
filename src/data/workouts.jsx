@@ -20,7 +20,7 @@ export const WorkoutPrograms = [
         supersets: [
           {
             name: "A",
-            sets: 4,
+            sets: 2,
             restBetweenSets: 2, // seconds
             restBetweenExercise: 5,
             exercises: [
@@ -30,7 +30,7 @@ export const WorkoutPrograms = [
           },
           {
             name: "B",
-            sets: 3,
+            sets: 2,
             restBetweenSets: 3,
             exercises: [
               { name: "TRX Split Squat", duration: 3 },
