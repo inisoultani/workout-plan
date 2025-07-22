@@ -268,17 +268,17 @@ export default function HomeWorkoutTimer() {
     if (!isResting) return 0;
     const currentPhase = workoutPhases[phaseIndex];
 
-    if(isSupersetPhase(currentPhase)) {
-      if (restType === "betweenSet") {
-        return currentPhase.supersets?.[supersetIndex]?.restBetweenSets ?? defaultRestBetweenSet;
-      } else {
-        return currentPhase.supersets?.[supersetIndex]?.restBetweenExercise ?? defaultRestBetweenExerciseInSet;
-      }
-    } else {
-      if (restType === "betweenExercise") {
-        return currentPhase.restBetweenExercise ?? defaultRestBetweenExercise;
-      }
+    if (isSupersetPhase(currentPhase)) {
+      const superset = currentPhase.supersets?.[supersetIndex];
+      return restType === "betweenSet"
+        ? superset?.restBetweenSets ?? defaultRestBetweenSet
+        : superset?.restBetweenExercise ?? defaultRestBetweenExerciseInSet;
     }
+
+    if (restType === "betweenExercise") {
+      return currentPhase.restBetweenExercise ?? defaultRestBetweenExercise;
+    }
+
     return 0;
   };
 
