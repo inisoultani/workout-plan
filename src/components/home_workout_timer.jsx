@@ -91,7 +91,7 @@ export default function HomeWorkoutTimer() {
           const currentSuperset = currentPhase.supersets[supersetIndex];
           const nextExerciseIndex = exerciseIndex + 1;
 
-          // === BETWEEN EXERCISE ===
+          // === BETWEEN EXERCISE in SUPERSET ===
           if (nextExerciseIndex < currentSuperset.exercises.length) {
             setExerciseIndex(nextExerciseIndex);
             setIsResting(true);
@@ -102,16 +102,15 @@ export default function HomeWorkoutTimer() {
               resume: currentSuperset.exercises[nextExerciseIndex].duration,
             });
             return currentSuperset.restBetweenExercise ?? defaultRestBetweenExerciseInSet;
-            //return currentSuperset.exercises[nextExerciseIndex].duration;
           }
 
+          // === BETWEEN SET ===
           const nextSetCount = setCount + 1;
           if (nextSetCount <= currentSuperset.sets) {
             setExerciseIndex(0);
             setSetCount(nextSetCount);
             setIsResting(true);
             setRestType("betweenSet");
-            //setResumeSeconds(currentSuperset.exercises[0].duration);
             setNextAfterRest({
                 type: "set",
                 setCount: nextSetCount,
@@ -119,7 +118,6 @@ export default function HomeWorkoutTimer() {
                 resume: currentSuperset.exercises[0].duration,
               });
             return currentSuperset.restBetweenSets ?? defaultRestBetweenSet;
-            //return currentSuperset.exercises[0].duration;
           }
 
           const nextSupersetIndex = supersetIndex + 1;
@@ -142,6 +140,7 @@ export default function HomeWorkoutTimer() {
           setRunning(false);
           return 0;
         } else {
+            // === BETWEEN EXERCISE in FLAT EXERCISE ===
             const nextExerciseIndex = exerciseIndex + 1;
             if (nextExerciseIndex < currentPhase.exercises.length) {
               setExerciseIndex(nextExerciseIndex);
