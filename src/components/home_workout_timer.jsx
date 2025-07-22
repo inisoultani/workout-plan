@@ -134,6 +134,71 @@ export default function HomeWorkoutTimer() {
     setSeconds(0);
   };
 
+  const goToPrevious = () => {
+    const currentPhase = workoutPhases[phaseIndex];
+
+    if (isSupersetPhase(currentPhase)) {
+      // Handle supersets
+      if (exerciseIndex > 0) {
+        const newExerciseIndex = exerciseIndex - 1;
+        setExerciseIndex(newExerciseIndex);
+        setSeconds(currentPhase.supersets[supersetIndex].exercises[newExerciseIndex].duration);
+        return;
+      }
+
+      if (setCount > 1) {
+        const previousSet = setCount - 1;
+        const lastExerciseIdx = currentPhase.supersets[supersetIndex].exercises.length - 1;
+        setSetCount(previousSet);
+        setExerciseIndex(lastExerciseIdx);
+        setSeconds(currentPhase.supersets[supersetIndex].exercises[lastExerciseIdx].duration);
+        return;
+      }
+
+      if (supersetIndex > 0) {
+        const prevSupersetIdx = supersetIndex - 1;
+        const prevSuperset = currentPhase.supersets[prevSupersetIdx];
+        const lastExerciseIdx = prevSuperset.exercises.length - 1;
+        setSupersetIndex(prevSupersetIdx);
+        setExerciseIndex(lastExerciseIdx);
+        setSetCount(prevSuperset.sets);
+        setSeconds(prevSuperset.exercises[lastExerciseIdx].duration);
+        return;
+      }
+    } else {
+      // Handle normal phase
+      if (exerciseIndex > 0) {
+        const newExerciseIndex = exerciseIndex - 1;
+        setExerciseIndex(newExerciseIndex);
+        setSeconds(currentPhase.exercises[newExerciseIndex].duration);
+        return;
+      }
+    }
+
+    // Fallback to previous phase if possible
+    if (phaseIndex > 0) {
+      const prevPhaseIdx = phaseIndex - 1;
+      const prevPhase = workoutPhases[prevPhaseIdx];
+      setPhaseIndex(prevPhaseIdx);
+
+      if (isSupersetPhase(prevPhase)) {
+        const lastSupersetIdx = prevPhase.supersets.length - 1;
+        const lastSuperset = prevPhase.supersets[lastSupersetIdx];
+        const lastExerciseIdx = lastSuperset.exercises.length - 1;
+
+        setSupersetIndex(lastSupersetIdx);
+        setExerciseIndex(lastExerciseIdx);
+        setSetCount(lastSuperset.sets);
+        setSeconds(lastSuperset.exercises[lastExerciseIdx].duration);
+      } else {
+        const lastExerciseIdx = prevPhase.exercises.length - 1;
+        setExerciseIndex(lastExerciseIdx);
+        setSeconds(prevPhase.exercises[lastExerciseIdx].duration);
+      }
+    }
+  };
+
+
   const currentPhase = workoutPhases[phaseIndex];
   const currentExercise = isSupersetPhase(currentPhase)
     ? currentPhase.supersets[supersetIndex].exercises[exerciseIndex]
@@ -161,6 +226,7 @@ export default function HomeWorkoutTimer() {
         <Button onClick={restart}>Restart</Button>
         <Button onClick={() => setRunning(false)}>Finish</Button>
         <Button onClick={skipToNext}>Next Movement</Button>
+        <Button onClick={goToPrevious}>Previous Movement</Button>
       </div>
     </div>
   );
