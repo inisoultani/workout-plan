@@ -8,29 +8,29 @@ export const WorkoutPrograms = [
         duration: 10 * 60,
         restBetweenExercise: 60,
         exercises: [
-          { name: "Jump rope", duration: 3 * 60 },
+          { name: "Jump rope", duration: 5 * 60 },
           { name: "Arm circle + shoulder roll", duration: 60 },
-          // { name: "World’s Greatest Stretch", duration: 40 },
-          // { name: "TRX scapular pull", duration: 50 },
-          // { name: "Bear Crawl maju-mundur", duration: 50 }
+          { name: "World’s Greatest Stretch", duration: 40 },
+          { name: "TRX scapular pull", duration: 50 },
+          { name: "Bear Crawl maju-mundur", duration: 50 }
         ]
       },
       {
         label: "Strength",
         supersets: [
-          {
-            name: "Z",
-            sets: 3,
-            restBetweenSets: 20, // seconds
-            restBetweenExercise: 20,
-            exercises: [
-              { name: "Galon Rowing 10 each side", duration: 120 },
-              { name: "TRX Split Squat", duration: 50 }
-            ]
-          },
+          // {
+          //   name: "Z",
+          //   sets: 3,
+          //   restBetweenSets: 20, // seconds
+          //   restBetweenExercise: 20,
+          //   exercises: [
+          //     { name: "Galon Rowing 10 each side", duration: 120 },
+          //     { name: "TRX Split Squat", duration: 50 }
+          //   ]
+          // },
           {
             name: "A",
-            sets: 3,
+            sets: 4,
             restBetweenSets: 20, // seconds
             restBetweenExercise: 20,
             exercises: [
@@ -40,20 +40,22 @@ export const WorkoutPrograms = [
           },
           {
             name: "B",
-            sets: 2,
-            restBetweenSets: 3,
+            sets: 4,
+            restBetweenSets: 20,
+            restBetweenExercise: 20,
             exercises: [
-              { name: "TRX Split Squat", duration: 3 },
-              { name: "Hindu + Tyson Push-up", duration: 3 }
+              { name: "TRX Split Squat", duration: 50 },
+              { name: "Hindu + Tyson Push-up", duration: 50 }
             ]
           },
           {
             name: "C",
             sets: 3,
-            restBetweenSets: 2,
+            restBetweenSets: 20,
+            restBetweenExercise: 20,
             exercises: [
-              { name: "Overhead Press Galon", duration: 3 },
-              { name: "Band Woodchop", duration: 3 }
+              { name: "Overhead Press Galon", duration: 60 },
+              { name: "Band Woodchop", duration: 60 }
             ]
           }
         ]
