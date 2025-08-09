@@ -35,24 +35,6 @@ export default function HomeWorkoutTimer() {
     return phase.exercises[exerciseIdx].duration;
   }
 
-  // const totalSeconds = workoutPhases.reduce((total, phase) => {
-  //   if (isSupersetPhase(phase)) {
-  //     return (
-  //       total +
-  //       phase.supersets.reduce((sTotal, superset) => {
-  //         return (
-  //           sTotal +
-  //           superset.sets *
-  //             superset.exercises.reduce((eTotal, e) => eTotal + e.duration, 0)
-  //         );
-  //       }, 0)
-  //     );
-  //   }
-  //   return (
-  //     total +
-  //     phase.exercises.reduce((eTotal, e) => eTotal + e.duration, 0)
-  //   );
-  // }, 0);
  const totalSeconds = workoutPhases.reduce((total, phase) => {
     // Superset phase
     if (phase.supersets) {
@@ -99,10 +81,10 @@ export default function HomeWorkoutTimer() {
         }
         return 0; // Let transition happen in a separate useEffect
       });
-      //setSeconds(10);
+
       if (seconds > 0){
-        console.log('tes',elapsedSeconds.current)
         elapsedSeconds.current += 1;
+        console.log('elapsedSeconds during interval',elapsedSeconds.current)
       }
     }, 1000);
 
@@ -340,7 +322,9 @@ export default function HomeWorkoutTimer() {
   const currentExercise = isSupersetPhase(currentPhase)
     ? currentPhase.supersets[supersetIndex].exercises[exerciseIndex]
     : currentPhase.exercises[exerciseIndex];
-  console.log("consumed time " + elapsedSeconds.current)
+  console.log("ElapsedSeconds " + elapsedSeconds.current);
+  console.log("Seconds " + seconds)
+
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
       <h1 className="text-4xl font-bold mb-2">{currentExercise.name}</h1>
