@@ -35,34 +35,55 @@ export default function HomeWorkoutTimer() {
     return phase.exercises[exerciseIdx].duration;
   }
 
- const totalSeconds = workoutPhases.reduce((total, phase) => {
-    // Superset phase
-    if (phase.supersets) {
-      return total + phase.supersets.reduce((sTotal, superset) => {
-        const exercisesTime = superset.exercises.reduce((eTotal, e) => eTotal + e.duration, 0);
-        const exerciseRests = (superset.exercises.length - 1) * (superset.restBetweenExercise || 0);
-        const oneSetTime = exercisesTime + exerciseRests;
-        const allSetsTime = oneSetTime * superset.sets;
-        const allSetsRest = superset.restBetweenSets * (superset.sets - 1);
-        return sTotal + allSetsTime + allSetsRest;
-      }, 0);
-    }
 
-    // Non-superset phase with fixed duration
-    if (typeof phase.duration === "number") {
-      return total + phase.duration;
-    }
+  function totalSecondsWithActualFlow(phases) {
+    return phases.reduce((total, phase, pIndex) => {
+      // Superset phase
+      if (phase.supersets) {
+        phase.supersets.forEach((superset, sIndex) => {
+          for (let set = 0; set < superset.sets; set++) {
+            superset.exercises.forEach((exercise, eIndex) => {
+              total += exercise.duration; // exercise time
+              // Rest after exercise (even last one if your timer does it)
+              if (eIndex < superset.exercises.length - 1) {
+                total += superset.restBetweenExercise || 0;
+              }
+            });
+            // Rest between sets
+            if (set < superset.sets - 1) {
+              total += superset.restBetweenSets || 0;
+            }
+          }
+          // Rest after last set of superset if your timer waits before next superset
+          if (sIndex < phase.supersets.length - 1) {
+            total += superset.restBetweenSets || 0;
+          }
+        });
+        return total;
+      }
 
-    // Non-superset phase with exercises listed individually
-    if (phase.exercises) {
-      const exercisesTime = phase.exercises.reduce((eTotal, e) => eTotal + e.duration, 0);
-      const exerciseRests = (phase.exercises.length - 1) * (phase.restBetweenExercise || 0);
-      return total + exercisesTime + exerciseRests;
-    }
+      // Non-superset phase with fixed duration
+      if (typeof phase.duration === "number") {
+        total += phase.duration;
+        return total;
+      }
 
-    return total;
-  }, 0);
+      // Non-superset phase with exercises
+      if (phase.exercises) {
+        phase.exercises.forEach((exercise, eIndex) => {
+          total += exercise.duration;
+          // Rest after exercise (even last one if your timer does it)
+          if (eIndex < phase.exercises.length - 1) {
+            total += phase.restBetweenExercise || 0;
+          }
+        });
+        return total;
+      }
 
+      return total;
+    }, 0);
+  }
+  const totalSeconds = totalSecondsWithActualFlow(workoutPhases);
   console.log("Total seconds of workout", totalSeconds);
 
 
@@ -72,19 +93,19 @@ export default function HomeWorkoutTimer() {
     if (!running) return;
 
     timerRef.current = setInterval(() => {
-      console.log('tick');
+      // console.log('tick');
       setSeconds((prevSeconds) => {
         if (prevSeconds > 0) {
           // console.log('elapsedSeconds : ',elapsedSeconds.current, 'secondsValue : ', prevSeconds)
-          // elapsedSeconds.current += 1;
+          elapsedSeconds.current += 1;
           return prevSeconds - 1;
         }
         return 0; // Let transition happen in a separate useEffect
       });
 
       if (seconds > 0){
-        elapsedSeconds.current += 1;
-        console.log('elapsedSeconds during interval',elapsedSeconds.current)
+        // elapsedSeconds.current += 1;
+        // console.log('elapsedSeconds during interval',elapsedSeconds.current)
       }
     }, 1000);
 
@@ -225,15 +246,17 @@ export default function HomeWorkoutTimer() {
   };
 
   const skipToNext = () => {
-    console.log("Before skip", {
-      seconds,
-      elapsedBefore: elapsedSeconds.current,
-    });
+   
     elapsedSeconds.current += seconds;
+    const currentPhase = workoutPhases[phaseIndex];
+    if(isSupersetPhase(currentPhase)) {
+      console.log(currentPhase.supersets[supersetIndex].name, ' - ', setCount, ' of ', currentPhase.supersets[supersetIndex].sets, ' : ', seconds, 'isResting : ', isResting);
+    } else {
+       console.log(currentPhase.label, ' - ', currentExercise.name, ' : ', seconds, 'isResting : ', isResting);
+    }
+    console.log('elapsedSeconds : ', elapsedSeconds.current)
     setSeconds(0);
-    console.log("After skip", {
-      elapsedAfter: elapsedSeconds.current,
-    });
+  
   };
 
   const goToPrevious = () => {
@@ -322,8 +345,8 @@ export default function HomeWorkoutTimer() {
   const currentExercise = isSupersetPhase(currentPhase)
     ? currentPhase.supersets[supersetIndex].exercises[exerciseIndex]
     : currentPhase.exercises[exerciseIndex];
-  console.log("ElapsedSeconds " + elapsedSeconds.current);
-  console.log("Seconds " + seconds)
+  // console.log("ElapsedSeconds " + elapsedSeconds.current);
+  // console.log("Seconds " + seconds)
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">

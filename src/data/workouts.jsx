@@ -52,7 +52,8 @@ export const WorkoutPrograms = [
       },
       {
         label: "Finisher",
-        duration: 6 * 60,
+        //duration: 6 * 60,
+        restBetweenExercise: 20,
         exercises: [
           { name: "TRX Rows (Ganjil)", duration: 60 },
           { name: "Jump Rope (Genap)", duration: 60 }
