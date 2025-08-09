@@ -5,7 +5,7 @@ export const WorkoutPrograms = [
     phases :  [
       {
         label: "Warm-Up",
-        duration: 10 * 60,
+        //duration: 10 * 60,
         restBetweenExercise: 60,
         exercises: [
           { name: "Jump rope", duration: 5 * 60 },
@@ -18,16 +18,6 @@ export const WorkoutPrograms = [
       {
         label: "Strength",
         supersets: [
-          // {
-          //   name: "Z",
-          //   sets: 3,
-          //   restBetweenSets: 20, // seconds
-          //   restBetweenExercise: 20,
-          //   exercises: [
-          //     { name: "Galon Rowing 10 each side", duration: 120 },
-          //     { name: "TRX Split Squat", duration: 50 }
-          //   ]
-          // },
           {
             name: "A",
             sets: 4,
@@ -70,7 +60,7 @@ export const WorkoutPrograms = [
       },
       {
         label: "Cooldown",
-        duration: 7 * 60,
+        //duration: 7 * 60,
         restBetweenExercise: 20,
         exercises: [
           { name: "TRX Chest Stretch", duration: 60 },

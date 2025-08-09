@@ -35,24 +35,52 @@ export default function HomeWorkoutTimer() {
     return phase.exercises[exerciseIdx].duration;
   }
 
-  const totalSeconds = workoutPhases.reduce((total, phase) => {
-    if (isSupersetPhase(phase)) {
-      return (
-        total +
-        phase.supersets.reduce((sTotal, superset) => {
-          return (
-            sTotal +
-            superset.sets *
-              superset.exercises.reduce((eTotal, e) => eTotal + e.duration, 0)
-          );
-        }, 0)
-      );
+  // const totalSeconds = workoutPhases.reduce((total, phase) => {
+  //   if (isSupersetPhase(phase)) {
+  //     return (
+  //       total +
+  //       phase.supersets.reduce((sTotal, superset) => {
+  //         return (
+  //           sTotal +
+  //           superset.sets *
+  //             superset.exercises.reduce((eTotal, e) => eTotal + e.duration, 0)
+  //         );
+  //       }, 0)
+  //     );
+  //   }
+  //   return (
+  //     total +
+  //     phase.exercises.reduce((eTotal, e) => eTotal + e.duration, 0)
+  //   );
+  // }, 0);
+ const totalSeconds = workoutPhases.reduce((total, phase) => {
+    // Superset phase
+    if (phase.supersets) {
+      return total + phase.supersets.reduce((sTotal, superset) => {
+        const exercisesTime = superset.exercises.reduce((eTotal, e) => eTotal + e.duration, 0);
+        const exerciseRests = (superset.exercises.length - 1) * (superset.restBetweenExercise || 0);
+        const oneSetTime = exercisesTime + exerciseRests;
+        const allSetsTime = oneSetTime * superset.sets;
+        const allSetsRest = superset.restBetweenSets * (superset.sets - 1);
+        return sTotal + allSetsTime + allSetsRest;
+      }, 0);
     }
-    return (
-      total +
-      phase.exercises.reduce((eTotal, e) => eTotal + e.duration, 0)
-    );
-  }, 0) + 432;
+
+    // Non-superset phase with fixed duration
+    if (typeof phase.duration === "number") {
+      return total + phase.duration;
+    }
+
+    // Non-superset phase with exercises listed individually
+    if (phase.exercises) {
+      const exercisesTime = phase.exercises.reduce((eTotal, e) => eTotal + e.duration, 0);
+      const exerciseRests = (phase.exercises.length - 1) * (phase.restBetweenExercise || 0);
+      return total + exercisesTime + exerciseRests;
+    }
+
+    return total;
+  }, 0);
+
   console.log("Total seconds of workout", totalSeconds);
 
 
@@ -65,12 +93,17 @@ export default function HomeWorkoutTimer() {
       console.log('tick');
       setSeconds((prevSeconds) => {
         if (prevSeconds > 0) {
-          console.log(elapsedSeconds.current)
-          elapsedSeconds.current += 1;
+          // console.log('elapsedSeconds : ',elapsedSeconds.current, 'secondsValue : ', prevSeconds)
+          // elapsedSeconds.current += 1;
           return prevSeconds - 1;
         }
         return 0; // Let transition happen in a separate useEffect
       });
+      //setSeconds(10);
+      if (seconds > 0){
+        console.log('tes',elapsedSeconds.current)
+        elapsedSeconds.current += 1;
+      }
     }, 1000);
 
     return () => {
