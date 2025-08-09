@@ -96,16 +96,16 @@ export default function HomeWorkoutTimer() {
       // console.log('tick');
       setSeconds((prevSeconds) => {
         if (prevSeconds > 0) {
-          // console.log('elapsedSeconds : ',elapsedSeconds.current, 'secondsValue : ', prevSeconds)
-          elapsedSeconds.current += 1;
+          console.log('elapsedSeconds : ',elapsedSeconds.current, 'secondsValue : ', prevSeconds)
+          // elapsedSeconds.current += 1;
           return prevSeconds - 1;
         }
         return 0; // Let transition happen in a separate useEffect
       });
 
       if (seconds > 0){
-        // elapsedSeconds.current += 1;
-        // console.log('elapsedSeconds during interval',elapsedSeconds.current)
+        elapsedSeconds.current += 1;
+        console.log('elapsedSeconds during interval',elapsedSeconds.current)
       }
     }, 1000);
 
