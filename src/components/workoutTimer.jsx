@@ -35,6 +35,10 @@ export default function HomeWorkoutTimer({ workoutPhases }) {
     dispatch({ type: ACTIONS.NEXT });
   }
 
+  function dispatchReset() {
+    dispatch({ type: ACTIONS.RESET });
+  }
+
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
       <h1 className="text-4xl font-bold mb-2">{currentExercise.name}</h1>
@@ -65,9 +69,10 @@ export default function HomeWorkoutTimer({ workoutPhases }) {
       <div className="flex gap-4">
         <Button onClick={dispatchStart}>Start</Button>
         <Button onClick={dispatchPause}>Pause</Button>
+        <Button onClick={dispatchReset}>Reset Movement</Button>
         <Button onClick={dispatchNext}>Next Movement</Button>
         {/* <Button onClick={() => setRunning(!running)}>{running ? "Pause" : "Resume"}</Button>
-        <Button onClick={resetCurrentExercise}>Reset Movement</Button>
+        
         <Button onClick={restart}>Restart</Button>
         <Button onClick={() => setRunning(false)}>Finish</Button>
         

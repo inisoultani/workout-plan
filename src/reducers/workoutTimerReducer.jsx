@@ -1,5 +1,6 @@
 import { DEFAULT_REST_BETWEEN_EXERCISE, DEFAULT_REST_BETWEEN_EXERCISE_IN_SET, DEFAULT_REST_BETWEEN_SET } from "@/constants/workoutTimerDefaults";
 import { WorkoutPrograms } from "@/data/workouts";
+import { getInitialSeconds } from "@/utils/workoutTimerLogic";
 
 export const ACTIONS = {
   START: "START",
@@ -12,7 +13,8 @@ export const ACTIONS = {
   NEXT_PHASE: "NEXT_PHASE",
   PAUSE: "PAUSE",
   STOP: "STOP",
-  NEXT: "NEXT"
+  NEXT: "NEXT",
+  RESET: "RESET_CURRENT_EXCERCISE"
 };
 
 export const INITIAL_WORKOUT_STATE = {
@@ -108,6 +110,11 @@ export function workoutTimerReducer(state, action) {
         ...state, 
         isRunning: false, 
         seconds: 0 
+      };
+    case ACTIONS.RESET:
+      return { 
+        ...state, 
+        seconds: getInitialSeconds(state.workoutPhases, state.phaseIndex, state.supersetIndex, state.exerciseIndex) 
       };
     default:
       return state;
