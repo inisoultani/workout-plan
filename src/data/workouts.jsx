@@ -9,9 +9,9 @@ export const WorkoutPrograms = [
         restBetweenExercise: 60,
         exercises: [
           { name: "Jump rope", duration: 5 * 60 },
-          { name: "Arm circle + shoulder roll", duration: 60 },
-          { name: "World’s Greatest Stretch", duration: 40 },
-          { name: "TRX scapular pull", duration: 50 },
+          // { name: "Arm circle + shoulder roll", duration: 60 },
+          // { name: "World’s Greatest Stretch", duration: 40 },
+          // { name: "TRX scapular pull", duration: 50 },
           { name: "Bear Crawl maju-mundur", duration: 50 }
         ]
       },
@@ -20,7 +20,7 @@ export const WorkoutPrograms = [
         supersets: [
           {
             name: "A",
-            sets: 4,
+            sets: 2,
             restBetweenSets: 20, // seconds
             restBetweenExercise: 20,
             exercises: [
@@ -28,26 +28,26 @@ export const WorkoutPrograms = [
               { name: "Bear Hug Galon Squat", duration: 50 }
             ]
           },
-          {
-            name: "B",
-            sets: 4,
-            restBetweenSets: 20,
-            restBetweenExercise: 20,
-            exercises: [
-              { name: "TRX Split Squat", duration: 50 },
-              { name: "Hindu + Tyson Push-up", duration: 50 }
-            ]
-          },
-          {
-            name: "C",
-            sets: 3,
-            restBetweenSets: 20,
-            restBetweenExercise: 20,
-            exercises: [
-              { name: "Overhead Press Galon", duration: 60 },
-              { name: "Band Woodchop", duration: 60 }
-            ]
-          }
+          // {
+          //   name: "B",
+          //   sets: 4,
+          //   restBetweenSets: 20,
+          //   restBetweenExercise: 20,
+          //   exercises: [
+          //     { name: "TRX Split Squat", duration: 50 },
+          //     { name: "Hindu + Tyson Push-up", duration: 50 }
+          //   ]
+          // },
+          // {
+          //   name: "C",
+          //   sets: 3,
+          //   restBetweenSets: 20,
+          //   restBetweenExercise: 20,
+          //   exercises: [
+          //     { name: "Overhead Press Galon", duration: 60 },
+          //     { name: "Band Woodchop", duration: 60 }
+          //   ]
+          // }
         ]
       },
       {

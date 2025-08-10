@@ -6,7 +6,7 @@ import { ProgressBarWithText } from "@/components/ui/progress-with-text";
 // import { WorkoutPrograms } from "@/data/workouts";
 import { useWorkoutTimer } from "@/hooks/useWorkoutTImer";
 import { ACTIONS } from "@/reducers/workoutTimerReducer";
-import { getInitialSeconds, getRestDuration, isSupersetPhase, totalSecondsWithActualFlow } from "@/utils/workoutTimerLogic";
+import { getRestDuration, isSupersetPhase, totalSecondsWithActualFlow } from "@/utils/workoutTimerLogic";
 
 // const workoutPhases = WorkoutPrograms.find(program => program.day == "Sunday").phases;
 
@@ -24,10 +24,15 @@ export default function HomeWorkoutTimer({ workoutPhases }) {
   // console.log("Seconds " + seconds)
 
   function dispatchStart() {
-    dispatch({ 
-      type: ACTIONS.START,
-      // seconds: getInitialSeconds(workoutPhases, state)
-    });
+    dispatch({ type: ACTIONS.START });
+  }
+
+  function dispatchPause() {
+    dispatch({ type: ACTIONS.PAUSE });
+  }
+
+  function dispatchNext() {
+    dispatch({ type: ACTIONS.NEXT });
   }
 
   return (
@@ -59,11 +64,13 @@ export default function HomeWorkoutTimer({ workoutPhases }) {
       
       <div className="flex gap-4">
         <Button onClick={dispatchStart}>Start</Button>
+        <Button onClick={dispatchPause}>Pause</Button>
+        <Button onClick={dispatchNext}>Next Movement</Button>
         {/* <Button onClick={() => setRunning(!running)}>{running ? "Pause" : "Resume"}</Button>
         <Button onClick={resetCurrentExercise}>Reset Movement</Button>
         <Button onClick={restart}>Restart</Button>
         <Button onClick={() => setRunning(false)}>Finish</Button>
-        <Button onClick={skipToNext}>Next Movement</Button>
+        
         <Button onClick={goToPrevious}>Previous Movement</Button> */}
       </div>
     </div>

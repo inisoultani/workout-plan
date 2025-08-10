@@ -10,7 +10,9 @@ export const ACTIONS = {
   NEXT_SET: "NEXT_SET",
   NEXT_SUPERSET: "NEXT_SUPERSET",
   NEXT_PHASE: "NEXT_PHASE",
-  STOP: "STOP"
+  PAUSE: "PAUSE",
+  STOP: "STOP",
+  NEXT: "NEXT"
 };
 
 export const INITIAL_WORKOUT_STATE = {
@@ -41,158 +43,7 @@ export function workoutTimerReducer(state, action) {
         // seconds: action.seconds 
       };
     case ACTIONS.TICK: {
-      let { seconds, isResting, elapsedSeconds, nextAfterRest } = state;
-      let newState = { ...state };
-
-      if (seconds > 0) {
-        console.log('elapsedSeconds inside TICK : ', elapsedSeconds);
-        return {
-          ...newState,
-          seconds: seconds - 1,
-          elapsedSeconds: elapsedSeconds + 1
-        };
-      }
-
-      // Rest period finished
-      if (isResting) {
-        newState.isResting = false;
-        newState.restType = null;
-
-        if (nextAfterRest) {
-          if (nextAfterRest.type === "exercise") {
-            newState.exerciseIndex = nextAfterRest.exerciseIndex;
-          } else if (nextAfterRest.type === "set") {
-            newState.setCount = nextAfterRest.setCount;
-            newState.exerciseIndex = 0;
-          } else if (nextAfterRest.type === "superset") {
-            newState.supersetIndex = nextAfterRest.supersetIndex;
-            newState.setCount = 1;
-            newState.exerciseIndex = 0;
-          }
-          newState.seconds = nextAfterRest.resume ?? 0;
-          newState.nextAfterRest = null;
-          return newState;
-        }
-      }
-
-      // Workout logic (superset vs flat)
-      const currentPhase = newState.workoutPhases[newState.phaseIndex];
-
-      if(currentPhase.supersets) {
-        // Superset mode
-        const currentSuperset = currentPhase.supersets[newState.supersetIndex];
-        const nextExerciseIndex = newState.exerciseIndex + 1;
-
-        if (nextExerciseIndex < currentSuperset.exercises.length) {
-          return {
-            ...newState,
-            exerciseIndex: nextExerciseIndex,
-            isResting: true,
-            restType: "betweenExercise",
-            nextAfterRest: {
-              type: "exercise",
-              exerciseIndex: nextExerciseIndex,
-              resume: currentSuperset.exercises[nextExerciseIndex].duration
-            },
-            seconds: getRestValue(
-              currentSuperset.restBetweenExercise,
-              DEFAULT_REST_BETWEEN_EXERCISE_IN_SET
-            )
-          };
-        }
-        // Between sets
-        const nextSetCount = newState.setCount + 1;
-        if (nextSetCount <= currentSuperset.sets) {
-          return {
-            ...newState,
-            exerciseIndex: 0,
-            setCount: nextSetCount,
-            isResting: true,
-            restType: "betweenSet",
-            nextAfterRest: {
-              type: "set",
-              setCount: nextSetCount,
-              resume: currentSuperset.exercises[0].duration
-            },
-            seconds: getRestValue(
-              currentSuperset.restBetweenSets,
-              DEFAULT_REST_BETWEEN_SET
-            )
-          };
-        }
-
-        // Between supersets
-        const nextSupersetIndex = newState.supersetIndex + 1;
-        if (nextSupersetIndex < currentPhase.supersets.length) {
-          return {
-            ...newState,
-            supersetIndex: nextSupersetIndex,
-            exerciseIndex: 0,
-            setCount: 1,
-            isResting: true,
-            restType: "betweenSet",
-            nextAfterRest: {
-              type: "superset",
-              supersetIndex: nextSupersetIndex,
-              resume: currentPhase.supersets[nextSupersetIndex].exercises[0].duration
-            },
-            seconds: getRestValue(
-              currentSuperset.restBetweenSets,
-              DEFAULT_REST_BETWEEN_SET
-            )
-          };
-        }
-
-        // Move to next phase
-        const nextPhaseIndex = newState.phaseIndex + 1;
-        if (nextPhaseIndex < newState.workoutPhases.length) {
-          return {
-            ...newState,
-            phaseIndex: nextPhaseIndex,
-            supersetIndex: 0,
-            exerciseIndex: 0,
-            setCount: 1,
-            seconds: currentPhase.exercises
-              ? currentPhase.exercises[0].duration
-              : currentPhase.supersets[0].exercises[0].duration
-          };
-        }
-
-        // Workout finished
-        return { ...newState, isRunning: false, seconds: 0 };
-      } else {
-        // Flat exercise mode
-        const nextExerciseIndex = newState.exerciseIndex + 1;
-        if (nextExerciseIndex < currentPhase.exercises.length) {
-          return {
-            ...newState,
-            exerciseIndex: nextExerciseIndex,
-            isResting: true,
-            restType: "betweenExercise",
-            nextAfterRest: {
-              type: "exercise",
-              exerciseIndex: nextExerciseIndex,
-              resume: currentPhase.exercises[nextExerciseIndex].duration
-            },
-            seconds: getRestValue(
-              currentPhase.restBetweenExercise,
-              DEFAULT_REST_BETWEEN_EXERCISE
-            )
-          };
-        }
-
-        const nextPhaseIndex = newState.phaseIndex + 1;
-        if (nextPhaseIndex < newState.workoutPhases.length) {
-          return {
-            ...newState,
-            phaseIndex: nextPhaseIndex,
-            exerciseIndex: 0,
-            seconds: currentPhase.exercises[0].duration
-          };
-        }
-
-        return { ...newState, isRunning: false, seconds: 0 };
-      }
+      return handleTick(state)
     }
     case ACTIONS.START_REST:
       return {
@@ -209,6 +60,13 @@ export function workoutTimerReducer(state, action) {
         restType: null,
         nextAfterRest: null,
         seconds: action.seconds
+      };
+     case ACTIONS.NEXT:
+      return {
+        ...state,
+        elapsedSeconds: state.elapsedSeconds + state.seconds,
+        seconds: 0
+
       };
     case ACTIONS.NEXT_EXERCISE:
       return {
@@ -240,6 +98,11 @@ export function workoutTimerReducer(state, action) {
         setCount: 1,
         seconds: action.seconds
       };
+    case ACTIONS.PAUSE:
+      return { 
+        ...state, 
+        isRunning: false, 
+      };
     case ACTIONS.STOP:
       return { 
         ...state, 
@@ -248,5 +111,162 @@ export function workoutTimerReducer(state, action) {
       };
     default:
       return state;
+  }
+}
+
+function handleTick(state) {
+  let { seconds, isResting, elapsedSeconds, nextAfterRest } = state;
+  let newState = { ...state };
+
+  if (seconds > 0) {
+    console.log('elapsedSeconds inside TICK : ', elapsedSeconds);
+    return {
+      ...newState,
+      seconds: seconds - 1,
+      elapsedSeconds: elapsedSeconds + 1
+    };
+  }
+
+  // Rest period finished
+  if (isResting) {
+    newState.isResting = false;
+    newState.restType = null;
+
+    if (nextAfterRest) {
+      if (nextAfterRest.type === "exercise") {
+        newState.exerciseIndex = nextAfterRest.exerciseIndex;
+      } else if (nextAfterRest.type === "set") {
+        newState.setCount = nextAfterRest.setCount;
+        newState.exerciseIndex = 0;
+      } else if (nextAfterRest.type === "superset") {
+        newState.supersetIndex = nextAfterRest.supersetIndex;
+        newState.setCount = 1;
+        newState.exerciseIndex = 0;
+      }
+      newState.seconds = nextAfterRest.resume ?? 0;
+      newState.nextAfterRest = null;
+      return newState;
+    }
+  }
+
+  // Workout logic (superset vs flat)
+  let currentPhase = newState.workoutPhases[newState.phaseIndex];
+  if(currentPhase.supersets) {
+    // Superset mode
+    const currentSuperset = currentPhase.supersets[newState.supersetIndex];
+    const nextExerciseIndex = newState.exerciseIndex + 1;
+
+    if (nextExerciseIndex < currentSuperset.exercises.length) {
+      return {
+        ...newState,
+        exerciseIndex: nextExerciseIndex,
+        isResting: true,
+        restType: "betweenExercise",
+        nextAfterRest: {
+          type: "exercise",
+          exerciseIndex: nextExerciseIndex,
+          resume: currentSuperset.exercises[nextExerciseIndex].duration
+        },
+        seconds: getRestValue(
+          currentSuperset.restBetweenExercise,
+          DEFAULT_REST_BETWEEN_EXERCISE_IN_SET
+        )
+      };
+    }
+    // Between sets
+    const nextSetCount = newState.setCount + 1;
+    if (nextSetCount <= currentSuperset.sets) {
+      return {
+        ...newState,
+        exerciseIndex: 0,
+        setCount: nextSetCount,
+        isResting: true,
+        restType: "betweenSet",
+        nextAfterRest: {
+          type: "set",
+          setCount: nextSetCount,
+          resume: currentSuperset.exercises[0].duration
+        },
+        seconds: getRestValue(
+          currentSuperset.restBetweenSets,
+          DEFAULT_REST_BETWEEN_SET
+        )
+      };
+    }
+
+    // Between supersets
+    const nextSupersetIndex = newState.supersetIndex + 1;
+    if (nextSupersetIndex < currentPhase.supersets.length) {
+      return {
+        ...newState,
+        supersetIndex: nextSupersetIndex,
+        exerciseIndex: 0,
+        setCount: 1,
+        isResting: true,
+        restType: "betweenSet",
+        nextAfterRest: {
+          type: "superset",
+          supersetIndex: nextSupersetIndex,
+          resume: currentPhase.supersets[nextSupersetIndex].exercises[0].duration
+        },
+        seconds: getRestValue(
+          currentSuperset.restBetweenSets,
+          DEFAULT_REST_BETWEEN_SET
+        )
+      };
+    }
+
+    // Move to next phase
+    const nextPhaseIndex = newState.phaseIndex + 1;
+    if (nextPhaseIndex < newState.workoutPhases.length) {
+      return {
+        ...newState,
+        phaseIndex: nextPhaseIndex,
+        supersetIndex: 0,
+        exerciseIndex: 0,
+        setCount: 1,
+        seconds: currentPhase.exercises
+          ? currentPhase.exercises[0].duration
+          : currentPhase.supersets[0].exercises[0].duration
+      };
+    }
+
+    // Workout finished
+    return { ...newState, isRunning: false, seconds: 0 };
+  } else {
+    // Flat exercise mode
+    const nextExerciseIndex = newState.exerciseIndex + 1;
+    if (nextExerciseIndex < currentPhase.exercises.length) {
+      return {
+        ...newState,
+        exerciseIndex: nextExerciseIndex,
+        isResting: true,
+        restType: "betweenExercise",
+        nextAfterRest: {
+          type: "exercise",
+          exerciseIndex: nextExerciseIndex,
+          resume: currentPhase.exercises[nextExerciseIndex].duration
+        },
+        seconds: getRestValue(
+          currentPhase.restBetweenExercise,
+          DEFAULT_REST_BETWEEN_EXERCISE
+        )
+      };
+    }
+
+    const nextPhaseIndex = newState.phaseIndex + 1;
+    if (nextPhaseIndex < newState.workoutPhases.length) {
+      currentPhase = newState.workoutPhases[nextPhaseIndex];
+      return {
+        ...newState,
+        phaseIndex: nextPhaseIndex,
+        exerciseIndex: 0,
+        seconds: currentPhase.exercises
+          ? currentPhase.exercises[0].duration
+          : currentPhase.supersets[0].exercises[0].duration
+      };
+    }
+
+    return { ...newState, isRunning: false, seconds: 0 };
   }
 }
