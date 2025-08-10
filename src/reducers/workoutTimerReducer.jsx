@@ -45,7 +45,7 @@ export function workoutTimerReducer(state, action) {
         // seconds: action.seconds 
       };
     case ACTIONS.TICK: {
-      return handleTick(state)
+      return reduceTick(state)
     }
     case ACTIONS.START_REST:
       return {
@@ -121,7 +121,7 @@ export function workoutTimerReducer(state, action) {
   }
 }
 
-function handleTick(state) {
+function reduceTick(state) {
   let { seconds, isResting, elapsedSeconds, nextAfterRest } = state;
   let newState = { ...state };
 
