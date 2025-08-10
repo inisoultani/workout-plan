@@ -1,5 +1,5 @@
 import './App.css'
-import HomeWorkoutTimer from './components/home_workout_timer'
+import HomeWorkoutTimer from './components/workoutTimer'
 import { WorkoutPrograms } from './data/workouts';
 
 function App() {

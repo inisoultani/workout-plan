@@ -2,8 +2,8 @@ import { DEFAULT_REST_BETWEEN_EXERCISE, DEFAULT_REST_BETWEEN_EXERCISE_IN_SET, DE
 
 export const isSupersetPhase = (phase) => !!phase.supersets;
 
-export function totalSecondsWithActualFlow(phases) {
-  return phases.reduce((total, phase, pIndex) => {
+export function totalSecondsWithActualFlow(workoutPhases) {
+  return workoutPhases.reduce((total, phase, pIndex) => {
     // Superset phase
     if (phase.supersets) {
       phase.supersets.forEach((superset, sIndex) => {
@@ -67,3 +67,11 @@ export function getRestDuration(state, workoutPhases) {
 
   return 0;
 };
+
+export function getInitialSeconds(workoutPhases, phaseIdx, supersetIdx, exerciseIdx) {
+    const phase = workoutPhases[phaseIdx];
+    if (isSupersetPhase(phase)) {
+      return phase.supersets[supersetIdx].exercises[exerciseIdx].duration;
+    }
+    return phase.exercises[exerciseIdx].duration;
+  }

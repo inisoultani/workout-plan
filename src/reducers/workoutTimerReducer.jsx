@@ -38,7 +38,7 @@ export function workoutTimerReducer(state, action) {
       return { 
         ...state, 
         isRunning: true, 
-        seconds: action.seconds 
+        // seconds: action.seconds 
       };
     case ACTIONS.TICK: {
       let { seconds, isResting, elapsedSeconds, nextAfterRest } = state;
