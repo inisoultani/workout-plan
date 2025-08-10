@@ -45,6 +45,7 @@ export function workoutTimerReducer(state, action) {
       let newState = { ...state };
 
       if (seconds > 0) {
+        console.log('elapsedSeconds inside TICK : ', elapsedSeconds);
         return {
           ...newState,
           seconds: seconds - 1,
