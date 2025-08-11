@@ -8,8 +8,6 @@ import { useWorkoutTimer } from "@/hooks/useWorkoutTImer";
 import { ACTIONS } from "@/reducers/workoutTimerReducer";
 import { getRestDuration, isSupersetPhase, totalSecondsWithActualFlow } from "@/utils/workoutTimerLogic";
 
-// const workoutPhases = WorkoutPrograms.find(program => program.day == "Sunday").phases;
-
 export default function WorkoutTimer({ workoutPhases }) {
  
   const {state, dispatch} = useWorkoutTimer(workoutPhases); 
