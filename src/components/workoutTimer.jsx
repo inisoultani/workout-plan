@@ -37,6 +37,10 @@ export default function WorkoutTimer({ workoutPhases }) {
     dispatch({ type: ACTIONS.RESET });
   }
 
+  function dispatchRestart() {
+    dispatch({ type: ACTIONS.RESTART });
+  }
+
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
       <h1 className="text-4xl font-bold mb-2">{currentExercise.name}</h1>
@@ -69,6 +73,7 @@ export default function WorkoutTimer({ workoutPhases }) {
         <Button onClick={dispatchPause}>Pause</Button>
         <Button onClick={dispatchReset}>Reset Movement</Button>
         <Button onClick={dispatchNext}>Next Movement</Button>
+        <Button onClick={dispatchRestart}>Restart</Button>
         {/* <Button onClick={() => setRunning(!running)}>{running ? "Pause" : "Resume"}</Button>
         
         <Button onClick={restart}>Restart</Button>

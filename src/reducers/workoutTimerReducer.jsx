@@ -116,6 +116,19 @@ export function workoutTimerReducer(state, action) {
         ...state, 
         seconds: getInitialSeconds(state.workoutPhases, state.phaseIndex, state.supersetIndex, state.exerciseIndex) 
       };
+    case ACTIONS.RESTART:
+      return { 
+        ...state, 
+        phaseIndex: 0,
+        supersetIndex: 0,
+        setCount: 1,
+        exerciseIndex: 0,
+        restType: null,
+        isResting: false,
+        elapsedSeconds: 0,
+        isRunning: true,
+        seconds: getInitialSeconds(state.workoutPhases, 0, 0, 0) 
+      };
     default:
       return state;
   }
