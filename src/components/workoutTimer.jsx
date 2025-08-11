@@ -40,6 +40,10 @@ export default function WorkoutTimer({ workoutPhases }) {
   function dispatchRestart() {
     dispatch({ type: ACTIONS.RESTART });
   }
+  
+  function dispatchGoToPrevious() {
+    dispatch({ type: ACTIONS.GO_TO_PREVIOUS });
+  }
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
@@ -73,13 +77,11 @@ export default function WorkoutTimer({ workoutPhases }) {
         <Button onClick={dispatchPause}>Pause</Button>
         <Button onClick={dispatchReset}>Reset Movement</Button>
         <Button onClick={dispatchNext}>Next Movement</Button>
+        <Button onClick={dispatchGoToPrevious}>Previous Movement</Button>
         <Button onClick={dispatchRestart}>Restart</Button>
-        {/* <Button onClick={() => setRunning(!running)}>{running ? "Pause" : "Resume"}</Button>
-        
-        <Button onClick={restart}>Restart</Button>
+        {/* 
         <Button onClick={() => setRunning(false)}>Finish</Button>
-        
-        <Button onClick={goToPrevious}>Previous Movement</Button> */}
+         */}
       </div>
     </div>
   );
