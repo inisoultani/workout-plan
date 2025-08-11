@@ -1,5 +1,4 @@
 import { DEFAULT_REST_BETWEEN_EXERCISE, DEFAULT_REST_BETWEEN_EXERCISE_IN_SET, DEFAULT_REST_BETWEEN_SET } from "@/constants/workoutTimerDefaults";
-import { WorkoutPrograms } from "@/data/workouts";
 import { getInitialSeconds, isSupersetPhase } from "@/utils/workoutTimerLogic";
 
 export const ACTIONS = {
