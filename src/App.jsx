@@ -1,5 +1,5 @@
 import './App.css'
-import HomeWorkoutTimer from './components/workoutTimer'
+import WorkoutTimer from './components/WorkoutTimer'
 import { WorkoutPrograms } from './data/workouts';
 
 function App() {
@@ -7,7 +7,7 @@ function App() {
   const workoutPhases = WorkoutPrograms.find(program => program.day == "Sunday").phases;
   return (
     <>
-      <div><HomeWorkoutTimer workoutPhases={workoutPhases} /></div>
+      <div><WorkoutTimer workoutPhases={workoutPhases} /></div>
     </>
   )
 }

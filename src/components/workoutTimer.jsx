@@ -10,7 +10,7 @@ import { getRestDuration, isSupersetPhase, totalSecondsWithActualFlow } from "@/
 
 // const workoutPhases = WorkoutPrograms.find(program => program.day == "Sunday").phases;
 
-export default function HomeWorkoutTimer({ workoutPhases }) {
+export default function WorkoutTimer({ workoutPhases }) {
  
   const {state, dispatch} = useWorkoutTimer(workoutPhases); 
   const totalSeconds = totalSecondsWithActualFlow(workoutPhases);
