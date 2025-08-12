@@ -294,18 +294,19 @@ function reduceTick(state) {
   }
 }
 
-function reduceGoToPrevious(state) {
+function reduceGoToPrevious(state, isInRestingPrev = false) {
   const { workoutPhases, isResting, phaseIndex, supersetIndex, exerciseIndex, setCount } = state;
   const currentPhase = workoutPhases[phaseIndex];
 
   // Check if resting go to exercise that causing it
   if (isResting) {
     const newState = { ...state };
+    isInRestingPrev = true;
     newState.isResting = false;
     newState.restType = null;
     newState.nextAfterRest = null;
-    // newState.seconds = 0;
-    return reduceGoToPrevious(newState);
+    
+    return reduceGoToPrevious(newState, isInRestingPrev);
   }
 
   // Superset handling
@@ -347,8 +348,9 @@ function reduceGoToPrevious(state) {
   else {
     if (exerciseIndex > 0) {
       const newExerciseIndex = exerciseIndex - 1;
+      const newState = recalculateElapsedSecondsAfterPrev(state, isInRestingPrev, currentPhase, exerciseIndex);
       return {
-        ...state,
+        ...newState,
         exerciseIndex: newExerciseIndex,
         seconds: currentPhase.exercises[newExerciseIndex].duration
       };
@@ -384,4 +386,19 @@ function reduceGoToPrevious(state) {
   }
 
   return state; // no changes
+}
+
+function recalculateElapsedSecondsAfterPrev(state, isInRestingPrev, currentPhase, exerciseIndex) {
+  const newState = { ...state };
+  const newExerciseIndex = exerciseIndex - 1;
+  console.log('elapsedSeconds before racalculate : ', newState.elapsedSeconds);
+  const restDuration = currentPhase.restBetweenExercise;
+  if(isInRestingPrev) {
+    newState.elapsedSeconds -= (restDuration - newState.seconds);
+  } else {
+    newState.elapsedSeconds -= (restDuration + (currentPhase.exercises[exerciseIndex].duration - newState.seconds));
+  }
+  newState.elapsedSeconds -= currentPhase.exercises[newExerciseIndex].duration;
+  console.log('elapsedSeconds after  racalculate : ', newState.elapsedSeconds);
+  return newState;
 }
