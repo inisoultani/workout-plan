@@ -65,12 +65,12 @@ export default function WorkoutTimer({ workoutPhases }) {
       ) : (
         <>
           <h2 className="text-3xl font-bold">{currentExercise.name}</h2>
-          <ProgressBarWithText value={((currentExercise.duration - state.seconds) / currentExercise.duration) * 100} textValue={`Loading...`} className="w-full h-5 bg-green-800 mb-2" />
+          <ProgressBarWithText value={((currentExercise.duration - state.seconds) / currentExercise.duration) * 100}  className="w-full h-5 bg-green-800 mb-2" />
         </>
       )}
        
-      <ProgressBarWithText value={((state.exerciseIndex + 1) / (isSupersetPhase(currentPhase) ? currentPhase.supersets[state.supersetIndex].exercises.length : currentPhase.exercises.length)) * 100}  textValue={`Loading...`} className="w-full h-5 bg-blue-800 mb-2" />
-      <ProgressBarWithText value={(state.elapsedSeconds / totalSeconds) * 100} textValue={`Loading...`} className="w-full h-5 bg-purple-800 mb-6" />
+      <ProgressBarWithText value={((state.exerciseIndex + 1) / (isSupersetPhase(currentPhase) ? currentPhase.supersets[state.supersetIndex].exercises.length : currentPhase.exercises.length)) * 100}   className="w-full h-5 bg-blue-800 mb-2" />
+      <ProgressBarWithText value={(state.elapsedSeconds / totalSeconds) * 100}  className="w-full h-5 bg-purple-800 mb-6" />
       
       <div className="flex gap-4">
         <Button onClick={dispatchStart}>Start</Button>

@@ -6,7 +6,7 @@ import * as ProgressPrimitive from "@radix-ui/react-progress"
 import { cn } from "@/lib/utils"
 
 
-function ProgressBarWithText ({ className, value, textValue, textClassName, indicatorClassName, ...props }, ref)  {
+function ProgressBarWithText ({ className, value, textClassName, indicatorClassName, ...props }, ref)  {
     return (
       <ProgressPrimitive.Root
         ref={ref}
