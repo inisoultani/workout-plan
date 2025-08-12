@@ -455,13 +455,13 @@ function recalculateElapsedSecondsAfterPrev(state, isInRestingPrev, currentPhase
     const prevPhaseIdx = state.phaseIndex - 1;
     const prevPhase = state.workoutPhases[prevPhaseIdx];
     const restDuration = 0 // since there's no rest between phaseno
+    const currentExerciseDuration = isSupersetPhase(currentPhase) ? 
+                          currentPhase.supersets[0].exercises[0].duration  :
+                          currentPhase.exercises[0].duration
     if (isSupersetPhase(prevPhase)) {
       const lastSupersetIdx = prevPhase.supersets.length - 1;
       const lastSuperset = prevPhase.supersets[lastSupersetIdx];
       const lastExerciseIdx = lastSuperset.exercises.length - 1;
-      const currentExerciseDuration = isSupersetPhase(currentPhase) ? 
-                          currentPhase.supersets[0].exercises[0].duration  :
-                          currentPhase.exercises[0].duration
       return calculateElapsedSeconds(state, 
         newState, 
         isInRestingPrev, 
@@ -474,7 +474,7 @@ function recalculateElapsedSecondsAfterPrev(state, isInRestingPrev, currentPhase
         newState, 
         isInRestingPrev, 
         restDuration, 
-        currentPhase.exercises[0].duration,
+        currentExerciseDuration,
         prevPhase.exercises[lastExerciseIdx].duration);
     }
   }
