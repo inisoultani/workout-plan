@@ -397,18 +397,10 @@ function reduceGoToPrevious(state, isInRestingPrev = false) {
 function recalculateElapsedSecondsAfterPrev(state, isInRestingPrev, currentPhase) {
   const newState = { ...state };
   if (isSupersetPhase(currentPhase)) {
+    // between exercise in a set
     if (state.exerciseIndex > 0) {
       const newExerciseIndex = state.exerciseIndex - 1;
-      const restDuration = currentPhase.supersets[state.supersetIndex].restBetweenExercise;
-      // console.log('elapsedSeconds before racalculate between exercise in superset : ', newState.elapsedSeconds);
-      // if(isInRestingPrev) {
-      //   newState.elapsedSeconds -= (restDuration - newState.seconds);
-      // } else {
-      //   newState.elapsedSeconds -= (restDuration + (currentPhase.supersets[newState.supersetIndex].exercises[state.exerciseIndex].duration - newState.seconds));
-      // }
-      // newState.elapsedSeconds -= currentPhase.supersets[newState.supersetIndex].exercises[newExerciseIndex].duration;
-      // console.log('elapsedSeconds after  racalculate between exercise in superset : ', newState.elapsedSeconds);
-      // return newState;
+      const restDuration = currentPhase.supersets[state.supersetIndex].restBetweenExercise;      
       return calculateElapsedSeconds(state, 
         newState, 
         isInRestingPrev, 
@@ -417,19 +409,10 @@ function recalculateElapsedSecondsAfterPrev(state, isInRestingPrev, currentPhase
         currentPhase.supersets[newState.supersetIndex].exercises[newExerciseIndex].duration);
     }
 
+    // between set in a superset
     if (state.setCount > 1) {
-      // const previousSet = setCount - 1;
       const lastExerciseIdx = currentPhase.supersets[state.supersetIndex].exercises.length - 1;
       const restDuration = currentPhase.supersets[state.supersetIndex].restBetweenSets;
-      // console.log('elapsedSeconds before racalculate between set in superset : ', newState.elapsedSeconds);
-      // if(isInRestingPrev) {
-      //   newState.elapsedSeconds -= (restDuration - newState.seconds);
-      // } else {
-      //   newState.elapsedSeconds -= (restDuration + (currentPhase.supersets[state.supersetIndex].exercises[state.exerciseIndex].duration - newState.seconds));
-      // }
-      // newState.elapsedSeconds -= currentPhase.supersets[state.supersetIndex].exercises[lastExerciseIdx].duration;
-      // console.log('elapsedSeconds after  racalculate between set in superset : ', newState.elapsedSeconds);
-      // return newState;
       return calculateElapsedSeconds(state, 
         newState, 
         isInRestingPrev, 
@@ -439,20 +422,12 @@ function recalculateElapsedSecondsAfterPrev(state, isInRestingPrev, currentPhase
       );
     }
 
+    // between superset
     if (state.supersetIndex > 0) {
       const prevSupersetIdx = state.supersetIndex - 1;
       const prevSuperset = currentPhase.supersets[prevSupersetIdx];
       const lastExerciseIdx = prevSuperset.exercises.length - 1;
       const restDuration = prevSuperset.restBetweenSets;
-      // console.log('elapsedSeconds before racalculate between superset in superset : ', newState.elapsedSeconds);
-      // if(isInRestingPrev) {
-      //   newState.elapsedSeconds -= (restDuration - newState.seconds);
-      // } else {
-      //   newState.elapsedSeconds -= (restDuration + (currentPhase.supersets[state.supersetIndex].exercises[state.exerciseIndex].duration - newState.seconds));
-      // }
-      // newState.elapsedSeconds -= prevSuperset.exercises[lastExerciseIdx].duration;
-      // console.log('elapsedSeconds after  racalculate between superset in superset : ', newState.elapsedSeconds);
-      // return newState;
       return calculateElapsedSeconds(state, 
         newState, 
         isInRestingPrev, 
@@ -461,20 +436,11 @@ function recalculateElapsedSecondsAfterPrev(state, isInRestingPrev, currentPhase
         prevSuperset.exercises[lastExerciseIdx].duration
       );
     }
-
   } else {
+    // between exercise in a flat exercise
     if (state.exerciseIndex > 0) { 
       const newExerciseIndex = state.exerciseIndex - 1;
-      // console.log('elapsedSeconds before racalculate : ', newState.elapsedSeconds);
       const restDuration = currentPhase.restBetweenExercise;
-      // if(isInRestingPrev) {
-      //   newState.elapsedSeconds -= (restDuration - newState.seconds);
-      // } else {
-      //   newState.elapsedSeconds -= (restDuration + (currentPhase.exercises[state.exerciseIndex].duration - newState.seconds));
-      // }
-      // newState.elapsedSeconds -= currentPhase.exercises[newExerciseIndex].duration;
-      // console.log('elapsedSeconds after  racalculate : ', newState.elapsedSeconds);
-      // return newState;
       return calculateElapsedSeconds(state, 
         newState, 
         isInRestingPrev, 
@@ -493,22 +459,9 @@ function recalculateElapsedSecondsAfterPrev(state, isInRestingPrev, currentPhase
       const lastSupersetIdx = prevPhase.supersets.length - 1;
       const lastSuperset = prevPhase.supersets[lastSupersetIdx];
       const lastExerciseIdx = lastSuperset.exercises.length - 1;
-
-      // const restDuration = isSupersetPhase(currentPhase) ? 
-      //                       currentPhase.supersets[state.supersetIndex].restBetweenSets  :
-      //                       currentPhase.restBetweenExercise;
-      // const restDuration = 0 // since there's no rest between phase now
-      // if(isInRestingPrev) {
-      //   newState.elapsedSeconds -= (restDuration - newState.seconds);
-      // } else {
-        const currentExerciseDuration = isSupersetPhase(currentPhase) ? 
-                            currentPhase.supersets[0].exercises[0].duration  :
-                            currentPhase.exercises[0].duration
-      //   newState.elapsedSeconds -= (restDuration + (currentExerciseDuration - newState.seconds));
-      // }
-      // newState.elapsedSeconds -= lastSuperset.exercises[lastExerciseIdx].duration;
-      // console.log('elapsedSeconds after racalculate between phases : ', newState.elapsedSeconds);
-      // return newState;
+      const currentExerciseDuration = isSupersetPhase(currentPhase) ? 
+                          currentPhase.supersets[0].exercises[0].duration  :
+                          currentPhase.exercises[0].duration
       return calculateElapsedSeconds(state, 
         newState, 
         isInRestingPrev, 
@@ -517,16 +470,6 @@ function recalculateElapsedSecondsAfterPrev(state, isInRestingPrev, currentPhase
         lastSuperset.exercises[lastExerciseIdx].duration);
     } else {
       const lastExerciseIdx = prevPhase.exercises.length - 1;
-      
-      // console.log('elapsedSeconds before racalculate between flat phases : ', newState.elapsedSeconds);
-      // if(isInRestingPrev) {
-      //   newState.elapsedSeconds -= (restDuration - newState.seconds);
-      // } else {
-      //   newState.elapsedSeconds -= (restDuration + (currentPhase.exercises[0].duration - newState.seconds));
-      // }
-      // newState.elapsedSeconds -= prevPhase.exercises[lastExerciseIdx].duration;
-      // console.log('elapsedSeconds after  racalculate between flat phases  : ', newState.elapsedSeconds);
-      // return newState;
       return calculateElapsedSeconds(state, 
         newState, 
         isInRestingPrev, 
@@ -539,9 +482,7 @@ function recalculateElapsedSecondsAfterPrev(state, isInRestingPrev, currentPhase
 }
 
 function calculateElapsedSeconds(state, newState, isInRestingPrev, restDuration, currentDuration, prevDuration) {
-  //const newExerciseIndex = state.exerciseIndex - 1;
   console.log('calculateElapsedSeconds before racalculate : ', newState.elapsedSeconds);
-  // const restDuration = currentPhase.restBetweenExercise;
   if(isInRestingPrev) {
     newState.elapsedSeconds -= (restDuration - newState.seconds);
   } else {
