@@ -309,29 +309,29 @@ function reduceGoToPrevious(state, isInRestingPrev = false) {
     return reduceGoToPrevious(newState, isInRestingPrev);
   }
 
-  // const newState = recalculateElapsedSecondsAfterPrev(state, isInRestingPrev, currentPhase);
-  const newState = { ...state, elapsedSeconds: recalculateElapsedSeconds(state, isInRestingPrev, findDataDuration(state, currentPhase)) };
   // Superset handling
   if (isSupersetPhase(currentPhase)) {
     if (exerciseIndex > 0) {
       const newExerciseIndex = exerciseIndex - 1;
-      // const newState = recalculateElapsedSecondsAfterPrev(state, isInRestingPrev, currentPhase);
+      
       return {
-        ...newState,
+        ...state,
         exerciseIndex: newExerciseIndex,
-        seconds: currentPhase.supersets[supersetIndex].exercises[newExerciseIndex].duration
+        seconds: currentPhase.supersets[supersetIndex].exercises[newExerciseIndex].duration,
+        elapsedSeconds: recalculateElapsedSeconds(state.seconds, state.elapsedSeconds, isInRestingPrev, findDataDuration(state, currentPhase))
       };
     }
 
     if (setCount > 1) {
       const previousSet = setCount - 1;
       const lastExerciseIdx = currentPhase.supersets[supersetIndex].exercises.length - 1;
-      // const newState = recalculateElapsedSecondsAfterPrev(state, isInRestingPrev, currentPhase);
+      
       return {
-        ...newState,
+        ...state,
         setCount: previousSet,
         exerciseIndex: lastExerciseIdx,
-        seconds: currentPhase.supersets[supersetIndex].exercises[lastExerciseIdx].duration
+        seconds: currentPhase.supersets[supersetIndex].exercises[lastExerciseIdx].duration,
+        elapsedSeconds: recalculateElapsedSeconds(state.seconds, state.elapsedSeconds, isInRestingPrev, findDataDuration(state, currentPhase))
       };
     }
 
@@ -339,13 +339,14 @@ function reduceGoToPrevious(state, isInRestingPrev = false) {
       const prevSupersetIdx = supersetIndex - 1;
       const prevSuperset = currentPhase.supersets[prevSupersetIdx];
       const lastExerciseIdx = prevSuperset.exercises.length - 1;
-      // const newState = recalculateElapsedSecondsAfterPrev(state, isInRestingPrev, currentPhase);
+      
       return {
-        ...newState,
+        ...state,
         supersetIndex: prevSupersetIdx,
         exerciseIndex: lastExerciseIdx,
         setCount: prevSuperset.sets,
-        seconds: prevSuperset.exercises[lastExerciseIdx].duration
+        seconds: prevSuperset.exercises[lastExerciseIdx].duration,
+        elapsedSeconds: recalculateElapsedSeconds(state.seconds, state.elapsedSeconds, isInRestingPrev, findDataDuration(state, currentPhase))
       };
     }
   }
@@ -354,9 +355,10 @@ function reduceGoToPrevious(state, isInRestingPrev = false) {
     if (exerciseIndex > 0) {
       const newExerciseIndex = exerciseIndex - 1;
       return {
-        ...newState,
+        ...state,
         exerciseIndex: newExerciseIndex,
-        seconds: currentPhase.exercises[newExerciseIndex].duration
+        seconds: currentPhase.exercises[newExerciseIndex].duration,
+        elapsedSeconds: recalculateElapsedSeconds(state.seconds, state.elapsedSeconds, isInRestingPrev, findDataDuration(state, currentPhase))
       };
     }
   }
@@ -370,22 +372,24 @@ function reduceGoToPrevious(state, isInRestingPrev = false) {
       const lastSupersetIdx = prevPhase.supersets.length - 1;
       const lastSuperset = prevPhase.supersets[lastSupersetIdx];
       const lastExerciseIdx = lastSuperset.exercises.length - 1;
-      // const newState = recalculateElapsedSecondsAfterPrev(state, isInRestingPrev, currentPhase);
+      
       return {
-        ...newState,
+        ...state,
         phaseIndex: prevPhaseIdx,
         supersetIndex: lastSupersetIdx,
         exerciseIndex: lastExerciseIdx,
         setCount: lastSuperset.sets,
-        seconds: lastSuperset.exercises[lastExerciseIdx].duration
+        seconds: lastSuperset.exercises[lastExerciseIdx].duration,
+        elapsedSeconds: recalculateElapsedSeconds(state.seconds, state.elapsedSeconds, isInRestingPrev, findDataDuration(state, currentPhase))
       };
     } else {
       const lastExerciseIdx = prevPhase.exercises.length - 1;
       return {
-        ...newState,
+        ...state,
         phaseIndex: prevPhaseIdx,
         exerciseIndex: lastExerciseIdx,
-        seconds: prevPhase.exercises[lastExerciseIdx].duration
+        seconds: prevPhase.exercises[lastExerciseIdx].duration,
+        elapsedSeconds: recalculateElapsedSeconds(state.seconds, state.elapsedSeconds, isInRestingPrev, findDataDuration(state, currentPhase))
       };
     }
   }
@@ -472,10 +476,10 @@ function findDataDuration(state, currentPhase) {
   
 }
 
-function recalculateElapsedSeconds(state, isInRestingPrev, dataDuration) {
-  let elapsedSeconds = state.elapsedSeconds;
+function recalculateElapsedSeconds(seconds, elapsedSeconds, isInRestingPrev, dataDuration) {
+  // let elapsedSeconds = state.elapsedSeconds;
   console.log('calculateElapsedSeconds before racalculate : ', elapsedSeconds);
-  elapsedSeconds -= isInRestingPrev ? (dataDuration.restDuration - state.seconds) : (dataDuration.restDuration + (dataDuration.currentDuration - state.seconds));
+  elapsedSeconds -= isInRestingPrev ? (dataDuration.restDuration - seconds) : (dataDuration.restDuration + (dataDuration.currentDuration - seconds));
   elapsedSeconds -= dataDuration.prevDuration;
   console.log('calculateElapsedSeconds after  racalculate : ', elapsedSeconds);
   return elapsedSeconds;
