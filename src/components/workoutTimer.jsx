@@ -5,6 +5,7 @@ import { WORKOUT_PHASES } from "@/constants/workoutTimerDefaults";
 import { useWorkoutTimer } from "@/hooks/useWorkoutTImer";
 import { ACTIONS } from "@/reducers/workoutTimerReducer";
 import { getRestDuration, isSupersetPhase, totalSecondsWithActualFlow } from "@/utils/workoutTimerLogic";
+import TimerController from "./ui/TimerController";
 
 export default function WorkoutTimer() {
  
@@ -18,30 +19,6 @@ export default function WorkoutTimer() {
   // console.log("Total seconds of workout", totalSeconds);
   // console.log("ElapsedSeconds " + elapsedSeconds.current);
   // console.log("Seconds " + seconds)
-
-  function dispatchStart() {
-    dispatch({ type: ACTIONS.START });
-  }
-
-  function dispatchPause() {
-    dispatch({ type: ACTIONS.PAUSE });
-  }
-
-  function dispatchNext() {
-    dispatch({ type: ACTIONS.NEXT });
-  }
-
-  function dispatchReset() {
-    dispatch({ type: ACTIONS.RESET });
-  }
-
-  function dispatchRestart() {
-    dispatch({ type: ACTIONS.RESTART });
-  }
-  
-  function dispatchGoToPrevious() {
-    dispatch({ type: ACTIONS.GO_TO_PREVIOUS });
-  }
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
@@ -70,17 +47,7 @@ export default function WorkoutTimer() {
       <ProgressBarWithText value={((state.exerciseIndex + 1) / (isSupersetPhase(currentPhase) ? currentPhase.supersets[state.supersetIndex].exercises.length : currentPhase.exercises.length)) * 100}   className="w-full h-5 bg-blue-800 mb-2" />
       <ProgressBarWithText value={(state.elapsedSeconds / totalSeconds) * 100}  className="w-full h-5 bg-purple-800 mb-6" />
       
-      <div className="flex gap-4">
-        <Button onClick={dispatchStart}>Start</Button>
-        <Button onClick={dispatchPause}>Pause</Button>
-        <Button onClick={dispatchReset}>Reset Movement</Button>
-        <Button onClick={dispatchNext}>Next Movement</Button>
-        <Button onClick={dispatchGoToPrevious}>Previous Movement</Button>
-        <Button onClick={dispatchRestart}>Restart</Button>
-        {/* 
-        <Button onClick={() => setRunning(false)}>Finish</Button>
-         */}
-      </div>
+      <TimerController dispatch={dispatch} />
     </div>
   );
 }
