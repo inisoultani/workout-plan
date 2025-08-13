@@ -6,6 +6,7 @@ import { useWorkoutTimer } from "@/hooks/useWorkoutTImer";
 import { ACTIONS } from "@/reducers/workoutTimerReducer";
 import { getRestDuration, isSupersetPhase, totalSecondsWithActualFlow } from "@/utils/workoutTimerLogic";
 import TimerController from "./ui/TimerController";
+import WorkoutProgressBar from "./ui/WorkoutProgressBar";
 
 export default function WorkoutTimer() {
  
@@ -31,22 +32,11 @@ export default function WorkoutTimer() {
         </>
       )}
       <div className="text-7xl font-mono mb-4">{state.seconds}s</div>
-
-      {state.isResting ? (
-        <>
-          <h2 className="text-3xl font-bold text-yellow-400 mb-2">{state.restType === "betweenSet" ? <div>Rest Between Sets</div> : <div>Rest Between Exercise</div>}</h2>
-          <ProgressBarWithText value={((restDuration - state.seconds) / restDuration) * 100}  className="w-full h-5 bg-yellow-800 mb-2" />
-        </>
-      ) : (
-        <>
-          <h2 className="text-3xl font-bold mb-2">{currentExercise.name}</h2>
-          <ProgressBarWithText value={((currentExercise.duration - state.seconds) / currentExercise.duration) * 100}  className="w-full h-5 bg-green-800 mb-2" />
-        </>
-      )}
-       
-      <ProgressBarWithText value={((state.exerciseIndex + 1) / (isSupersetPhase(currentPhase) ? currentPhase.supersets[state.supersetIndex].exercises.length : currentPhase.exercises.length)) * 100}   className="w-full h-5 bg-blue-800 mb-2" />
-      <ProgressBarWithText value={(state.elapsedSeconds / totalSeconds) * 100}  className="w-full h-5 bg-purple-800 mb-6" />
-      
+      <WorkoutProgressBar state={state} 
+          currentPhase={currentPhase} 
+          currentExercise={currentExercise} 
+          totalSeconds={totalSeconds} 
+          restDuration={restDuration}/>
       <TimerController dispatch={dispatch} />
     </div>
   );
