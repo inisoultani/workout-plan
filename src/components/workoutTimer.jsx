@@ -1,9 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { ProgressBarWithText } from "@/components/ui/progress-with-text";
 import { WORKOUT_PHASES } from "@/constants/workoutTimerDefaults";
 import { useWorkoutTimer } from "@/hooks/useWorkoutTImer";
-import { ACTIONS } from "@/reducers/workoutTimerReducer";
 import { getRestDuration, isSupersetPhase, totalSecondsWithActualFlow } from "@/utils/workoutTimerLogic";
 import TimerController from "./ui/TimerController";
 import WorkoutProgressBar from "./ui/WorkoutProgressBar";
