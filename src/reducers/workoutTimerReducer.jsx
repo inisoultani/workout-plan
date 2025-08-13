@@ -1,5 +1,5 @@
-import { DEFAULT_REST_BETWEEN_EXERCISE, DEFAULT_REST_BETWEEN_EXERCISE_IN_SET, DEFAULT_REST_BETWEEN_SET } from "@/constants/workoutTimerDefaults";
-import { getInitialSeconds, isSupersetPhase } from "@/utils/workoutTimerLogic";
+import { DEFAULT_REST_BETWEEN_EXERCISE, DEFAULT_REST_BETWEEN_EXERCISE_IN_SET, DEFAULT_REST_BETWEEN_SET, WORKOUT_PHASES } from "@/constants/workoutTimerDefaults";
+import { getInitialSeconds, isSupersetPhase, recalculateElapsedSeconds } from "@/utils/workoutTimerLogic";
 
 export const ACTIONS = {
   START: "START",
@@ -28,8 +28,7 @@ export const INITIAL_WORKOUT_STATE = {
   isResting: false,
   restType: null,
   nextAfterRest: null,
-  elapsedSeconds: 0,
-  workoutPhases: []
+  elapsedSeconds: 0
 };
 
 // Helper: get rest duration with default
@@ -112,11 +111,14 @@ export function workoutTimerReducer(state, action) {
         isRunning: false, 
         seconds: 0 
       };
-    case ACTIONS.RESET:
+    case ACTIONS.RESET: {
+      const initialSeconds = getInitialSeconds(WORKOUT_PHASES[state.phaseIndex], state.phaseIndex, state.supersetIndex, state.exerciseIndex);
       return { 
         ...state, 
-        seconds: getInitialSeconds(state.workoutPhases, state.phaseIndex, state.supersetIndex, state.exerciseIndex) 
+        seconds: initialSeconds,
+        elapsedSeconds: state.elapsedSeconds - (initialSeconds - state.seconds)
       };
+    }
     case ACTIONS.RESTART:
       return { 
         ...state, 
@@ -128,7 +130,7 @@ export function workoutTimerReducer(state, action) {
         isResting: false,
         elapsedSeconds: 0,
         isRunning: true,
-        seconds: getInitialSeconds(state.workoutPhases, 0, 0, 0) 
+        seconds: getInitialSeconds(WORKOUT_PHASES[0], 0, 0, 0) 
       };
     case ACTIONS.GO_TO_PREVIOUS:
       return reduceGoToPrevious(state);
@@ -173,7 +175,7 @@ function reduceTick(state) {
   }
 
   // Workout logic (superset vs flat)
-  let currentPhase = newState.workoutPhases[newState.phaseIndex];
+  let currentPhase = WORKOUT_PHASES[newState.phaseIndex];
   if(currentPhase.supersets) {
     // Superset mode
     const currentSuperset = currentPhase.supersets[newState.supersetIndex];
@@ -241,7 +243,7 @@ function reduceTick(state) {
 
     // Move to next phase
     const nextPhaseIndex = newState.phaseIndex + 1;
-    if (nextPhaseIndex < newState.workoutPhases.length) {
+    if (nextPhaseIndex < WORKOUT_PHASES.length) {
       return {
         ...newState,
         phaseIndex: nextPhaseIndex,
@@ -278,8 +280,8 @@ function reduceTick(state) {
     }
 
     const nextPhaseIndex = newState.phaseIndex + 1;
-    if (nextPhaseIndex < newState.workoutPhases.length) {
-      currentPhase = newState.workoutPhases[nextPhaseIndex];
+    if (nextPhaseIndex < WORKOUT_PHASES.length) {
+      currentPhase = WORKOUT_PHASES[nextPhaseIndex];
       return {
         ...newState,
         phaseIndex: nextPhaseIndex,
@@ -295,8 +297,8 @@ function reduceTick(state) {
 }
 
 function reduceGoToPrevious(state, isInRestingPrev = false) {
-  const { workoutPhases, isResting, phaseIndex, supersetIndex, exerciseIndex, setCount } = state;
-  const currentPhase = workoutPhases[phaseIndex];
+  const { isResting, phaseIndex, supersetIndex, exerciseIndex, setCount } = state;
+  const currentPhase = WORKOUT_PHASES[phaseIndex];
 
   // Check if resting go to exercise that causing it
   if (isResting) {
@@ -366,7 +368,7 @@ function reduceGoToPrevious(state, isInRestingPrev = false) {
   // Fallback to previous phase
   if (phaseIndex > 0) {
     const prevPhaseIdx = phaseIndex - 1;
-    const prevPhase = workoutPhases[prevPhaseIdx];
+    const prevPhase = WORKOUT_PHASES[prevPhaseIdx];
 
     if (isSupersetPhase(prevPhase)) {
       const lastSupersetIdx = prevPhase.supersets.length - 1;
@@ -450,7 +452,7 @@ function findDataDuration(state, currentPhase) {
   // Fallback to previous phase
   if (state.phaseIndex > 0) {
     const prevPhaseIdx = state.phaseIndex - 1;
-    const prevPhase = state.workoutPhases[prevPhaseIdx];
+    const prevPhase = WORKOUT_PHASES[prevPhaseIdx];
     const restDuration = 0 // since there's no rest between phaseno
     const currentExerciseDuration = isSupersetPhase(currentPhase) ? 
                           currentPhase.supersets[0].exercises[0].duration  :
@@ -474,13 +476,4 @@ function findDataDuration(state, currentPhase) {
     }
   }
   
-}
-
-function recalculateElapsedSeconds(seconds, elapsedSeconds, isInRestingPrev, dataDuration) {
-  // let elapsedSeconds = state.elapsedSeconds;
-  console.log('calculateElapsedSeconds before racalculate : ', elapsedSeconds);
-  elapsedSeconds -= isInRestingPrev ? (dataDuration.restDuration - seconds) : (dataDuration.restDuration + (dataDuration.currentDuration - seconds));
-  elapsedSeconds -= dataDuration.prevDuration;
-  console.log('calculateElapsedSeconds after  racalculate : ', elapsedSeconds);
-  return elapsedSeconds;
 }

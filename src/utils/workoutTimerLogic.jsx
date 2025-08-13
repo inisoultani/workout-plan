@@ -50,10 +50,8 @@ export function totalSecondsWithActualFlow(workoutPhases) {
   }, 0);
 }
 
-export function getRestDuration(state, workoutPhases) {
+export function getRestDuration(state, currentPhase) {
   if (!state.isResting) return 0;
-  const currentPhase = workoutPhases[state.phaseIndex];
-
   if (isSupersetPhase(currentPhase)) {
     const superset = currentPhase.supersets?.[state.supersetIndex];
     return state.restType === "betweenSet"
@@ -68,10 +66,19 @@ export function getRestDuration(state, workoutPhases) {
   return 0;
 };
 
-export function getInitialSeconds(workoutPhases, phaseIdx, supersetIdx, exerciseIdx) {
-    const phase = workoutPhases[phaseIdx];
-    if (isSupersetPhase(phase)) {
-      return phase.supersets[supersetIdx].exercises[exerciseIdx].duration;
-    }
-    return phase.exercises[exerciseIdx].duration;
+export function getInitialSeconds(phase, phaseIdx, supersetIdx, exerciseIdx) {
+    
+  if (isSupersetPhase(phase)) {
+    return phase.supersets[supersetIdx].exercises[exerciseIdx].duration;
   }
+  return phase.exercises[exerciseIdx].duration;
+}
+
+export function recalculateElapsedSeconds(seconds, elapsedSeconds, isInRestingPrev, dataDuration) {
+  // let elapsedSeconds = state.elapsedSeconds;
+  console.log('calculateElapsedSeconds before racalculate : ', elapsedSeconds);
+  elapsedSeconds -= isInRestingPrev ? (dataDuration.restDuration - seconds) : (dataDuration.restDuration + (dataDuration.currentDuration - seconds));
+  elapsedSeconds -= dataDuration.prevDuration;
+  console.log('calculateElapsedSeconds after  racalculate : ', elapsedSeconds);
+  return elapsedSeconds;
+}
