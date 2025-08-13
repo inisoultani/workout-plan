@@ -58,11 +58,11 @@ export default function WorkoutTimer() {
       {state.isResting ? (
         <>
           <h2 className="text-3xl font-bold text-yellow-400 mb-2">{state.restType === "betweenSet" ? <div>Rest Between Sets</div> : <div>Rest Between Exercise</div>}</h2>
-          <Progress value={((restDuration - state.seconds) / restDuration) * 100} className="w-full h-4 bg-yellow-800 mb-6" />
+          <ProgressBarWithText value={((restDuration - state.seconds) / restDuration) * 100}  className="w-full h-5 bg-yellow-800 mb-2" />
         </>
       ) : (
         <>
-          <h2 className="text-3xl font-bold">{currentExercise.name}</h2>
+          <h2 className="text-3xl font-bold mb-2">{currentExercise.name}</h2>
           <ProgressBarWithText value={((currentExercise.duration - state.seconds) / currentExercise.duration) * 100}  className="w-full h-5 bg-green-800 mb-2" />
         </>
       )}
