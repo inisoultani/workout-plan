@@ -1,19 +1,17 @@
-// import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ProgressBarWithText } from "@/components/ui/progress-with-text";
-// import { DEFAULT_REST_BETWEEN_EXERCISE, DEFAULT_REST_BETWEEN_EXERCISE_IN_SET, DEFAULT_REST_BETWEEN_SET } from "@/constants/workoutTimerDefaults";
-// import { WorkoutPrograms } from "@/data/workouts";
+import { WORKOUT_PHASES } from "@/constants/workoutTimerDefaults";
 import { useWorkoutTimer } from "@/hooks/useWorkoutTImer";
 import { ACTIONS } from "@/reducers/workoutTimerReducer";
 import { getRestDuration, isSupersetPhase, totalSecondsWithActualFlow } from "@/utils/workoutTimerLogic";
 
-export default function WorkoutTimer({ workoutPhases }) {
+export default function WorkoutTimer() {
  
-  const {state, dispatch} = useWorkoutTimer(workoutPhases); 
-  const totalSeconds = totalSecondsWithActualFlow(workoutPhases);
-  const restDuration = getRestDuration(state, workoutPhases);
-  const currentPhase = workoutPhases[state.phaseIndex];
+  const {state, dispatch} = useWorkoutTimer(); 
+  const totalSeconds = totalSecondsWithActualFlow(WORKOUT_PHASES);
+  const currentPhase = WORKOUT_PHASES[state.phaseIndex];
+  const restDuration = getRestDuration(state, currentPhase);
   const currentExercise = isSupersetPhase(currentPhase)
     ? currentPhase.supersets[state.supersetIndex].exercises[state.exerciseIndex]
     : currentPhase.exercises[state.exerciseIndex];
