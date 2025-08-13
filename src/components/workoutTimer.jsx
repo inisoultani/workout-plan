@@ -27,7 +27,7 @@ export default function WorkoutTimer() {
           <h4 className="text-sm mb-4">Set {state.setCount} of {currentPhase.supersets[state.supersetIndex].sets}</h4>
         </>
       )}
-      <div className="text-7xl font-mono mb-4">{state.seconds}s</div>
+      <div className="text-9xl orbitron-secs mb-4">{state.seconds}s</div>
       <WorkoutProgressBar state={state} 
           currentPhase={currentPhase} 
           currentExercise={currentExercise} 
