@@ -41,7 +41,7 @@ export function getExercisesLength(state, currentPhase) {
 export function getRestDuration(state, currentPhase) {
   if (!state.isResting) return 0;
   if (isSuperset(currentPhase)) {
-    const superset = currentPhase.supersets?.[state.supersetIndex];
+    const superset = currentPhase.groups?.[state.supersetIndex];
     return state.restType === "betweenSet"
       ? superset?.restBetweenSets ?? DEFAULT_REST_BETWEEN_SET
       : superset?.restBetweenExercise ?? DEFAULT_REST_BETWEEN_EXERCISE_IN_SET;
