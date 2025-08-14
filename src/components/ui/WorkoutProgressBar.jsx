@@ -1,13 +1,11 @@
-import { isSupersetPhase } from "@/utils/workoutTimerLogic";
+import { getExercisesLength } from "@/utils/workoutTimerLogic";
 import { ProgressBarWithText } from "./progress-with-text";
 
 export default function WorkoutProgressBar({state, currentPhase, currentExercise, totalSeconds, restDuration}) {
 
   const exerciseProgress = ((currentExercise.duration - state.seconds) / currentExercise.duration) * 100;
   const restProgress = ((restDuration - state.seconds) / restDuration) * 100;
-  const exerciseIndexProgress = ((state.exerciseIndex + 1) / (isSupersetPhase(currentPhase)
-    ? currentPhase.supersets[state.supersetIndex].exercises.length
-    : currentPhase.exercises.length)) * 100;
+  const exerciseIndexProgress = getExercisesLength(state, currentPhase) * 100;
   const totalProgress = (state.elapsedSeconds / totalSeconds) * 100;
 
   return (

@@ -5,27 +5,25 @@ export const WorkoutPrograms = [
     phases :  [
       {
         label: "Warm-Up",
-        //duration: 10 * 60,
-        restBetweenExercise: 60,
+        type: "linear", // could be: linear | superset | circuit | amrap | emom | tabata
+        restBetweenExercise: 3,
         exercises: [
-          { name: "Jump rope", duration: 5 * 60 },
-          { name: "Arm circle + shoulder roll", duration: 60 },
-          { name: "World’s Greatest Stretch", duration: 40 },
-          { name: "TRX scapular pull", duration: 50 },
-          { name: "Bear Crawl maju-mundur", duration: 50 }
+          { name: "Jump rope", duration: 5 },
+          { name: "Arm circle + shoulder roll", duration: 5 }
         ]
       },
       {
         label: "Strength",
-        supersets: [
+        type: "superset",
+        groups: [
           {
             name: "A",
             sets: 4,
-            restBetweenSets: 20, // seconds
-            restBetweenExercise: 20,
+            restBetweenSets: 3,
+            restBetweenExercise: 3,
             exercises: [
-              { name: "Pull-up", duration: 50 },
-              { name: "Bear Hug Galon Squat", duration: 50 }
+              { name: "Pull-up", duration: 5 },
+              { name: "Bear Hug Galon Squat", duration: 4 }
             ]
           },
           {
@@ -37,40 +35,21 @@ export const WorkoutPrograms = [
               { name: "TRX Split Squat", duration: 50 },
               { name: "Hindu + Tyson Push-up", duration: 50 }
             ]
-          },
-          {
-            name: "C",
-            sets: 3,
-            restBetweenSets: 20,
-            restBetweenExercise: 20,
-            exercises: [
-              { name: "Overhead Press Galon", duration: 60 },
-              { name: "Band Woodchop", duration: 60 }
-            ]
           }
         ]
       },
       {
-        label: "Finisher",
-        //duration: 6 * 60,
+        label: "Conditioning",
+        type: "circuit",
+        rounds: 3,
+        restBetweenRounds: 60,
         restBetweenExercise: 20,
         exercises: [
-          { name: "TRX Rows (Ganjil)", duration: 60 },
-          { name: "Jump Rope (Genap)", duration: 60 }
+          { name: "Burpees", duration: 30 },
+          { name: "Mountain Climbers", duration: 30 },
+          { name: "Kettlebell Swings", duration: 30 }
         ]
       },
-      {
-        label: "Cooldown",
-        //duration: 7 * 60,
-        restBetweenExercise: 20,
-        exercises: [
-          { name: "TRX Chest Stretch", duration: 60 },
-          { name: "Spinal Twist", duration: 60 },
-          { name: "Pec stretch di pintu", duration: 60 },
-          { name: "Deep squat hold", duration: 60 },
-          { name: "Leher & bahu gerak ringan", duration: 60 }
-        ]
-      }
     ]
   },
 ];
