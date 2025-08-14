@@ -1,5 +1,5 @@
 import { DEFAULT_REST_BETWEEN_EXERCISE, DEFAULT_REST_BETWEEN_EXERCISE_IN_SET, DEFAULT_REST_BETWEEN_ROUNDS, DEFAULT_REST_BETWEEN_SET, WORKOUT_PHASES } from "@/constants/workoutTimerDefaults";
-import { getInitialSeconds, getPhase, isCircuit, isLinear, isSuperset } from "@/utils/workoutTimerLogic";
+import { getCurrentExercise, getInitialSeconds, getPhase, isCircuit, isLinear, isSuperset } from "@/utils/workoutTimerLogic";
 
 export const ACTIONS = {
   START: "START",
@@ -404,15 +404,8 @@ function reduceTick(state) {
 }
 
 function getCurrentExerciseDuration(state, phase) {
-  if (isSuperset(phase)) {
-    const group = phase.groups?.[state.supersetIndex];
-    return group?.exercises?.[state.exerciseIndex]?.duration ?? 0;
-  }
-  if (isCircuit(phase)) {
-    return phase.exercises?.[state.exerciseIndex]?.duration ?? 0;
-  }
-  // linear
-  return phase.exercises?.[state.exerciseIndex]?.duration ?? 0;
+  const currentExercise = getCurrentExercise(state, phase);
+  return currentExercise?.duration ?? 0;
 }
 
 // Rest getters (with defaults)

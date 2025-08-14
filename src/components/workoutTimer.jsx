@@ -1,6 +1,6 @@
 import { WORKOUT_PHASES } from "@/constants/workoutTimerDefaults";
 import { useWorkoutTimer } from "@/hooks/useWorkoutTImer";
-import { getCurrentExcercise, getGroupInfo, getRestDuration, isSuperset, totalSecondsWithActualFlow } from "@/utils/workoutTimerLogic";
+import { getCurrentExercise, getGroupInfo, getRestDuration, isSuperset, totalSecondsWithActualFlow } from "@/utils/workoutTimerLogic";
 import TimerController from "./ui/TimerController";
 import WorkoutProgressBar from "./ui/WorkoutProgressBar";
 
@@ -10,7 +10,7 @@ export default function WorkoutTimer() {
   const totalSeconds = totalSecondsWithActualFlow(WORKOUT_PHASES);
   const currentPhase = WORKOUT_PHASES[state.phaseIndex];
   const restDuration = getRestDuration(state, currentPhase);
-  const currentExercise = getCurrentExcercise(state, currentPhase);
+  const currentExercise = getCurrentExercise(state, currentPhase);
   const groupInfo = getGroupInfo(state, currentPhase)
   // console.log("Total seconds of workout", totalSeconds);
   // console.log("ElapsedSeconds " + elapsedSeconds.current);

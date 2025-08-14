@@ -11,16 +11,14 @@ export function isCircuit(phase)  { return phase?.type === "circuit"; }
 // ===== Safe getters =====
 export function getPhase(phases, idx) { return phases?.[idx]; }
 
-export function getCurrentExcercise(state, currentPhase) {
-  let currentExercise;
+export function getCurrentExercise(state, currentPhase) {
   if (isSuperset(currentPhase)) {
-    currentExercise = currentPhase.groups[state.supersetIndex].exercises[state.exerciseIndex];
-  } else if (isCircuit(currentPhase) || isLinear(currentPhase)) {
-    currentExercise = currentPhase.exercises[state.exerciseIndex];
-  } else {
-    currentExercise = null; // unknown phase type
+    return currentPhase.groups?.[state.supersetIndex]?.exercises?.[state.exerciseIndex] ?? null;
+  } 
+  if (isCircuit(currentPhase) || isLinear(currentPhase)) {
+    return currentPhase.exercises?.[state.exerciseIndex] ?? null;
   }
-  return currentExercise;
+  return null; // unknown phase type
 }
 
 export function getExercisesLength(state, currentPhase) {
