@@ -1,20 +1,29 @@
-import { isSupersetPhase } from "@/utils/workoutTimerLogic";
+import { getExercisesLength } from "@/utils/workoutTimerLogic";
 import { ProgressBarWithText } from "./progress-with-text";
 
 export default function WorkoutProgressBar({state, currentPhase, currentExercise, totalSeconds, restDuration}) {
-
   const exerciseProgress = ((currentExercise.duration - state.seconds) / currentExercise.duration) * 100;
   const restProgress = ((restDuration - state.seconds) / restDuration) * 100;
-  const exerciseIndexProgress = ((state.exerciseIndex + 1) / (isSupersetPhase(currentPhase)
-    ? currentPhase.supersets[state.supersetIndex].exercises.length
-    : currentPhase.exercises.length)) * 100;
+  const exerciseIndexProgress = ((state.exerciseIndex + 1) / getExercisesLength(state, currentPhase)) * 100;
   const totalProgress = (state.elapsedSeconds / totalSeconds) * 100;
 
+  // if(state.isResting) { 
+  //   console.log("state.restType", state.restType);
+  //   console.log("state.isResting", state.isResting);
+  //   console.log("restDuration", restDuration);
+  //   console.log("state.seconds", state.seconds);
+  //   console.log("restProgress", restProgress);
+  // }
+  
   return (
     <>
       {state.isResting ? (
         <>
-          <h2 className="text-3xl font-bold text-yellow-400 mb-2">{state.restType === "betweenSet" ? <div>Rest Between Sets</div> : <div>Rest Between Exercise</div>}</h2>
+          <h2 className="text-3xl font-bold text-yellow-400 mb-2">
+            {state.restType === "betweenSet" && <div>Rest Between Sets</div>}
+            {state.restType === "betweenExercise" && <div>Rest Between Exercise</div>}
+            {state.restType === "betweenPhase" && <div>Rest Between Phases</div>}
+          </h2>
           <ProgressBarWithText value={restProgress}  className="w-full h-5 bg-yellow-800 mb-2" />
         </>
       ) : (
