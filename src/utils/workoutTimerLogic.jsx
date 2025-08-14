@@ -129,3 +129,25 @@ export function recalculateElapsedSeconds(seconds, elapsedSeconds, isInRestingPr
   console.log('calculateElapsedSeconds after  racalculate : ', elapsedSeconds);
   return elapsedSeconds;
 }
+
+export function getGroupInfo(state, phase) {
+  if (isSuperset(phase)) {
+    return {
+      type: "Superset",
+      label: "Set",
+      name: phase.groups[state.supersetIndex].name,
+      sets: phase.groups[state.supersetIndex].sets,
+      currentSet: state.setCount
+    };
+  }
+  if (isCircuit(phase)) {
+    return {
+      type: "Circuit",
+      label: "Round",
+      name: phase.label,
+      sets: phase.rounds,
+      currentSet: state.roundCount
+    };
+  }
+  return null;
+}
