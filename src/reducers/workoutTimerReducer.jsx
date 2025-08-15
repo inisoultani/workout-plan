@@ -24,11 +24,12 @@ export const INITIAL_WORKOUT_STATE = {
   exerciseIndex: 0,      // index into exercises array
   setCount: 1,           // active set number for superset groups
   roundCount: 1,         // active round number for circuit phases
+  exerciseSetCount: 1,   // NEW: active set number for individual exercises (linear phases)
   seconds: 0,            // remaining seconds on the current step (exercise or rest)
   isRunning: false,
   isResting: false,
   restType: null,        // "betweenExercise" | "betweenSet" (we also use "betweenSet" for between-group/round)
-  nextAfterRest: null,   // shape: { phaseIndex?, supersetIndex?, setCount?, roundCount?, exerciseIndex?, resume }
+  nextAfterRest: null,   // shape: { resume } - simplified since state changes applied immediately
   elapsedSeconds: 0      // total time actually ticked so far
 };
 
@@ -70,7 +71,7 @@ export function workoutTimerReducer(state, action) {
     case ACTIONS.RESTART:
       return { 
         ...INITIAL_WORKOUT_STATE, 
-        seconds: getInitialSeconds(WORKOUT_PHASES[0], 0, 0, 0) 
+        seconds: getInitialSeconds(workoutPhases[0], 0, 0, 0) 
       };
 
     default:
@@ -160,12 +161,30 @@ function reduceNext(state, phases) {
   // --- Linear ---
   if (isLinear(phase)) {
     const exs = phase.exercises ?? [];
+    const currentExercise = exs[state.exerciseIndex];
+
+    // Check if this exercise has multiple sets
+    if (currentExercise?.sets && currentExercise.sets > 1) {
+      // within same exercise → next set
+      if (state.exerciseSetCount < currentExercise.sets) {
+        const rest = restBetweenSetsForLinear(phase);
+        return scheduleRest(state, rest, {
+          phaseIndex: state.phaseIndex,
+          exerciseIndex: state.exerciseIndex,
+          exerciseSetCount: state.exerciseSetCount + 1,
+          resume: currentExercise.duration ?? 0
+        }, "betweenSet");
+      }
+    }
+
+    // end of exercise → next exercise (or if single-set exercise)
     if (state.exerciseIndex < exs.length - 1) {
       const rest = restBetweenExerciseForPhase(phase);
       const nextIdx = state.exerciseIndex + 1;
       return scheduleRest(state, rest, {
         phaseIndex: state.phaseIndex,
         exerciseIndex: nextIdx,
+        exerciseSetCount: 1,
         resume: exs[nextIdx]?.duration ?? 0
       }, "betweenExercise");
     }
@@ -204,6 +223,7 @@ function reduceNext(state, phases) {
       ...state,
       phaseIndex: state.phaseIndex + 1,
       exerciseIndex: 0,
+      exerciseSetCount: 1,
       seconds: firstDur
     };
   }
@@ -217,13 +237,15 @@ function reduceGoToPrevious(state, phases, isInRestingPrev = false) {
   const phase = getPhase(phases, state.phaseIndex);
   if (!phase) return state;
 
-  // If currently resting, cancel rest and recurse (flag that we were in rest)
+  // If currently resting, cancel rest and restore current exercise duration
   if (state.isResting) {
+    const currentExercise = getCurrentExercise(state, phase);
     const cleared = {
       ...state,
       isResting: false,
       restType: null,
-      nextAfterRest: null
+      nextAfterRest: null,
+      seconds: currentExercise?.duration ?? 0  // Restore current exercise duration
     };
     return reduceGoToPrevious(cleared, phases, true);
   }
@@ -301,12 +323,27 @@ function reduceGoToPrevious(state, phases, isInRestingPrev = false) {
   // Linear cases
   if (isLinear(phase)) {
     const exs = phase.exercises ?? [];
+    const currentExercise = exs[state.exerciseIndex];
+
+    // within same exercise → previous set (only if exercise has multiple sets)
+    if (currentExercise?.sets && currentExercise.sets > 1 && state.exerciseSetCount > 1) {
+      return {
+        ...state,
+        exerciseSetCount: state.exerciseSetCount - 1,
+        seconds: currentExercise.duration ?? 0,
+        elapsedSeconds: newElapsed
+      };
+    }
+
+    // first set of exercise (or single-set exercise) → previous exercise
     if (state.exerciseIndex > 0) {
       const newIdx = state.exerciseIndex - 1;
+      const prevExercise = exs[newIdx];
       return {
         ...state,
         exerciseIndex: newIdx,
-        seconds: exs[newIdx]?.duration ?? 0,
+        exerciseSetCount: prevExercise?.sets ?? 1,
+        seconds: prevExercise?.duration ?? 0,
         elapsedSeconds: newElapsed
       };
     }
@@ -347,11 +384,13 @@ function reduceGoToPrevious(state, phases, isInRestingPrev = false) {
 
     // linear
     const lastIdx = (prevPhase.exercises?.length ?? 1) - 1;
+    const lastExercise = prevPhase.exercises?.[lastIdx];
     return {
       ...state,
       phaseIndex: state.phaseIndex - 1,
       exerciseIndex: lastIdx,
-      seconds: prevPhase.exercises?.[lastIdx]?.duration ?? 0,
+      exerciseSetCount: lastExercise?.sets ?? 1,
+      seconds: lastExercise?.duration ?? 0,
       elapsedSeconds: newElapsed
     };
   }
@@ -373,18 +412,13 @@ function reduceTick(state) {
         elapsedSeconds: state.elapsedSeconds + 1
       };
     }
-    // Rest finished → jump to the stored target
+    // Rest finished → restore exercise duration
     const next = state.nextAfterRest ?? {};
     return {
       ...state,
       isResting: false,
       restType: null,
       nextAfterRest: null,
-      phaseIndex: next.phaseIndex ?? state.phaseIndex,
-      supersetIndex: next.supersetIndex ?? state.supersetIndex,
-      setCount: next.setCount ?? state.setCount,
-      roundCount: next.roundCount ?? state.roundCount,
-      exerciseIndex: next.exerciseIndex ?? state.exerciseIndex,
       seconds: next.resume ?? 0,
       elapsedSeconds: state.elapsedSeconds + 1 // the final second of rest also elapsed
     };
@@ -429,6 +463,10 @@ function restBetweenRoundsForCircuit(phase) {
   return phase.restBetweenRounds ?? DEFAULT_REST_BETWEEN_ROUNDS;
 }
 
+function restBetweenSetsForLinear(phase) {
+  return phase.restBetweenSets ?? DEFAULT_REST_BETWEEN_SET;
+}
+
 // ===== Utility: schedule a rest or jump directly if rest=0 =====
 function scheduleRest(state, restDuration, nextAfterRest, restTypeFallback = "betweenSet") {
   if (restDuration > 0) {
@@ -436,37 +474,19 @@ function scheduleRest(state, restDuration, nextAfterRest, restTypeFallback = "be
     const inferredType =
       nextAfterRest.exerciseIndex === 0 ? "betweenSet" : "betweenExercise";
 
+    // FIXED: Apply the next state immediately, store only the resume duration
     return {
       ...state,
+      ...nextAfterRest,  // Apply all the next state changes immediately
       isResting: true,
       restType: inferredType ?? restTypeFallback,
       seconds: restDuration,
-      nextAfterRest
+      nextAfterRest: { resume: nextAfterRest.resume }  // Only store the resume duration
     };
   }
   // no rest → immediate transition
   return { ...state, ...nextAfterRest };
 }
-
-// // ===== Elapsed seconds recalculation when going BACK =====
-// // dataDuration = { restDuration, currentDuration, prevDuration }
-// function recalcElapsedOnBack(currentSeconds, elapsedSeconds, isInRestingPrev, dataDuration) {
-//   let newElapsed = elapsedSeconds;
-
-//   if (isInRestingPrev) {
-//     // We were inside a rest: roll back only the portion already spent in this rest.
-//     // (restDuration - currentSeconds) is the elapsed part of the rest we need to undo.
-//     newElapsed -= (dataDuration.restDuration - currentSeconds);
-//   } else {
-//     // We were on an exercise: roll back the rest before it + the part of current exercise that elapsed.
-//     newElapsed -= (dataDuration.restDuration + (dataDuration.currentDuration - currentSeconds));
-//   }
-//   // Also roll back the full previous-step exercise (we're stepping to it)
-//   newElapsed -= dataDuration.prevDuration;
-
-//   if (newElapsed < 0) newElapsed = 0;
-//   return newElapsed;
-// }
 
 // ===== Build the durations needed to back-step from current position =====
 function findBackStepDurations(state, currentPhase, phases) {
@@ -542,13 +562,27 @@ function findBackStepDurations(state, currentPhase, phases) {
   // ---- Linear ----
   if (isLinear(currentPhase)) {
     const exs = currentPhase.exercises ?? [];
+    const currentExercise = exs[exerciseIndex];
+
+    // within same exercise → previous set (only for multi-set exercises)
+    if (currentExercise?.sets && currentExercise.sets > 1 && state.exerciseSetCount > 1) {
+      const restDuration = restBetweenSetsForLinear(currentPhase);
+      return {
+        restDuration,
+        currentDuration: currentExercise.duration ?? 0,
+        prevDuration: currentExercise.duration ?? 0
+      };
+    }
+
+    // first set of exercise (or single-set exercise) → previous exercise
     if (exerciseIndex > 0) {
       const prevIdx = exerciseIndex - 1;
+      const prevExercise = exs[prevIdx];
       const restDuration = restBetweenExerciseForPhase(currentPhase);
       return {
         restDuration,
-        currentDuration: exs[exerciseIndex]?.duration ?? 0,
-        prevDuration: exs[prevIdx]?.duration ?? 0
+        currentDuration: currentExercise?.duration ?? 0,
+        prevDuration: prevExercise?.duration ?? 0
       };
     }
   }

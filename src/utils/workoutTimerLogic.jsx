@@ -125,8 +125,21 @@ export function totalSecondsWithActualFlow(workoutPhases) {
     // Linear phase with exercises (non-circuit, non-superset)
     if (phase.exercises) {
       phase.exercises.forEach((exercise, eIndex) => {
-        total += exercise.duration;
-        // Rest after exercise (except last one)
+        if (exercise.sets && exercise.sets > 1) {
+          // Multi-set exercise
+          for (let set = 1; set <= exercise.sets; set++) {
+            total += exercise.duration; // exercise time
+            // Rest between sets (except after last set)
+            if (set < exercise.sets) {
+              total += phase.restBetweenSets || 0;
+            }
+          }
+        } else {
+          // Single-set exercise (or no sets specified)
+          total += exercise.duration;
+        }
+        
+        // Rest between exercises (except after last exercise)
         if (eIndex < phase.exercises.length - 1) {
           total += phase.restBetweenExercise || 0;
         }
@@ -177,6 +190,18 @@ export function getGroupInfo(state, phase) {
       sets: phase.rounds,
       currentSet: state.roundCount
     };
+  }
+  if (isLinear(phase)) {
+    const currentExercise = phase.exercises?.[state.exerciseIndex];
+    if (currentExercise?.sets && currentExercise.sets > 1) {
+      return {
+        type: "Linear",
+        label: "Set",
+        name: currentExercise.name,
+        sets: currentExercise.sets,
+        currentSet: state.exerciseSetCount
+      };
+    }
   }
   return null;
 }

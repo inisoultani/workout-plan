@@ -12,9 +12,7 @@ export default function WorkoutTimer() {
   const restDuration = getRestDuration(state, currentPhase);
   const currentExercise = getCurrentExercise(state, currentPhase);
   const groupInfo = getGroupInfo(state, currentPhase)
-  // console.log("Total seconds of workout", totalSeconds);
-  // console.log("ElapsedSeconds " + elapsedSeconds.current);
-  // console.log("Seconds " + seconds)
+
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">

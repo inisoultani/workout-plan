@@ -3,11 +3,10 @@ import { ACTIONS, workoutTimerReducer, INITIAL_WORKOUT_STATE } from "@/reducers/
 import { getInitialSeconds } from "@/utils/workoutTimerLogic";
 import { useEffect, useReducer, useRef } from "react";
 
-export function useWorkoutTimer(workoutPhases) {
+export function useWorkoutTimer() {
 
   const [state, dispatch] = useReducer(workoutTimerReducer, {
     ...INITIAL_WORKOUT_STATE,
-    workoutPhases,
     seconds: getInitialSeconds(WORKOUT_PHASES[0], 0, 0, 0)
   });
   const timerRef = useRef(null);
