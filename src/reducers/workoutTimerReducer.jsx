@@ -391,7 +391,7 @@ function reduceTick(state) {
   }
 
   // Exercise countdown
-  if (state.seconds > 1) {
+  if (state.seconds > 0) {
     return {
       ...state,
       seconds: state.seconds - 1,
