@@ -74,8 +74,8 @@ export function getInitialSeconds(currentPhase, phaseIdx, supersetIndex, exercis
 export function totalSecondsWithActualFlow(workoutPhases) {
   return workoutPhases.reduce((total, phase) => {
     // Superset phase
-    if (phase.supersets) {
-      phase.supersets.forEach((superset, sIndex) => {
+    if (isSuperset(phase)) {
+      phase.groups.forEach((superset, sIndex) => {
         for (let set = 0; set < superset.sets; set++) {
           superset.exercises.forEach((exercise, eIndex) => {
             total += exercise.duration; // exercise time
@@ -90,31 +90,50 @@ export function totalSecondsWithActualFlow(workoutPhases) {
           }
         }
         // Rest after last set of superset if your timer waits before next superset
-        if (sIndex < phase.supersets.length - 1) {
+        if (sIndex < phase.groups.length - 1) {
           total += superset.restBetweenSets || 0;
         }
       });
       return total;
     }
 
-    // Non-superset phase with fixed duration
+    // Circuit phase
+    if (isCircuit(phase)) {
+      const rounds = phase.rounds || 1;
+      for (let round = 0; round < rounds; round++) {
+        phase.exercises.forEach((exercise, eIndex) => {
+          total += exercise.duration; // exercise time
+          // Rest between exercises within the round (except after last exercise in round)
+          if (eIndex < phase.exercises.length - 1) {
+            total += phase.restBetweenExercise || 0;
+          }
+        });
+        // Rest between rounds (except after last round)
+        if (round < rounds - 1) {
+          total += phase.restBetweenRounds || 0;
+        }
+      }
+      return total;
+    }
+
+    // Phase with fixed duration
     if (typeof phase.duration === "number") {
       total += phase.duration;
       return total;
     }
 
-    // Non-superset phase with exercises
+    // Linear phase with exercises (non-circuit, non-superset)
     if (phase.exercises) {
       phase.exercises.forEach((exercise, eIndex) => {
         total += exercise.duration;
-        // Rest after exercise (even last one if your timer does it)
+        // Rest after exercise (except last one)
         if (eIndex < phase.exercises.length - 1) {
           total += phase.restBetweenExercise || 0;
         }
       });
       return total;
     }
-
+    
     return total;
   }, 0);
 }
