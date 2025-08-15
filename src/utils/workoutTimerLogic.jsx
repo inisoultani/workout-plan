@@ -138,13 +138,25 @@ export function totalSecondsWithActualFlow(workoutPhases) {
   }, 0);
 }
 
-export function recalculateElapsedSeconds(seconds, elapsedSeconds, isInRestingPrev, dataDuration) {
-  // let elapsedSeconds = state.elapsedSeconds;
+// ===== Elapsed seconds recalculation when going BACK =====
+// dataDuration = { restDuration, currentDuration, prevDuration }
+export function recalculateElapsedSeconds(currentSeconds, elapsedSeconds, isInRestingPrev, dataDuration) {
+
+  let newElapsed = elapsedSeconds;
   console.log('calculateElapsedSeconds before racalculate : ', elapsedSeconds);
-  elapsedSeconds -= isInRestingPrev ? (dataDuration.restDuration - seconds) : (dataDuration.restDuration + (dataDuration.currentDuration - seconds));
-  elapsedSeconds -= dataDuration.prevDuration;
+  if (isInRestingPrev) {
+    // We were inside a rest: roll back only the portion already spent in this rest.
+    // (restDuration - currentSeconds) is the elapsed part of the rest we need to undo.
+    newElapsed -= (dataDuration.restDuration - currentSeconds);
+  } else {
+    // We were on an exercise: roll back the rest before it + the part of current exercise that elapsed.
+    newElapsed -= (dataDuration.restDuration + (dataDuration.currentDuration - currentSeconds));
+  }
+  // Also roll back the full previous-step exercise (we're stepping to it)
+  newElapsed -= dataDuration.prevDuration;
   console.log('calculateElapsedSeconds after  racalculate : ', elapsedSeconds);
-  return elapsedSeconds;
+  if (newElapsed < 0) newElapsed = 0;
+  return newElapsed;
 }
 
 export function getGroupInfo(state, phase) {

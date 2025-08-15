@@ -1,5 +1,5 @@
 import { DEFAULT_REST_BETWEEN_EXERCISE, DEFAULT_REST_BETWEEN_EXERCISE_IN_SET, DEFAULT_REST_BETWEEN_ROUNDS, DEFAULT_REST_BETWEEN_SET, WORKOUT_PHASES } from "@/constants/workoutTimerDefaults";
-import { getCurrentExercise, getInitialSeconds, getPhase, isCircuit, isLinear, isSuperset } from "@/utils/workoutTimerLogic";
+import { getCurrentExercise, getInitialSeconds, getPhase, isCircuit, isLinear, isSuperset, recalculateElapsedSeconds } from "@/utils/workoutTimerLogic";
 
 export const ACTIONS = {
   START: "START",
@@ -43,10 +43,10 @@ export function workoutTimerReducer(state, action) {
       return { ...state, isRunning: false };
 
     case ACTIONS.NEXT:
-      return goToNext(state, WORKOUT_PHASES);
+      return reduceNext(state, WORKOUT_PHASES);
 
     case ACTIONS.GO_TO_PREVIOUS:
-      return goToPrevious(state, WORKOUT_PHASES);
+      return reduceGoToPrevious(state, WORKOUT_PHASES);
 
     case ACTIONS.TICK: 
       return reduceTick(state);
@@ -80,7 +80,7 @@ export function workoutTimerReducer(state, action) {
 
 
 // ===== Navigation: NEXT =====
-function goToNext(state, phases) {
+function reduceNext(state, phases) {
   const phase = getPhase(phases, state.phaseIndex);
   if (!phase) return { ...state, isRunning: false };
 
@@ -213,7 +213,7 @@ function goToNext(state, phases) {
 }
 
 // ===== Navigation: PREVIOUS (with elapsedSeconds rollback) =====
-function goToPrevious(state, phases, isInRestingPrev = false) {
+function reduceGoToPrevious(state, phases, isInRestingPrev = false) {
   const phase = getPhase(phases, state.phaseIndex);
   if (!phase) return state;
 
@@ -225,12 +225,12 @@ function goToPrevious(state, phases, isInRestingPrev = false) {
       restType: null,
       nextAfterRest: null
     };
-    return goToPrevious(cleared, phases, true);
+    return reduceGoToPrevious(cleared, phases, true);
   }
 
   // Compute what to subtract from elapsedSeconds for this back step
   const backDur = findBackStepDurations(state, phase, phases);
-  const newElapsed = recalcElapsedOnBack(state.seconds, state.elapsedSeconds, isInRestingPrev, backDur);
+  const newElapsed = recalculateElapsedSeconds(state.seconds, state.elapsedSeconds, isInRestingPrev, backDur);
 
   // Superset cases
   if (isSuperset(phase)) {
@@ -400,7 +400,7 @@ function reduceTick(state) {
   }
 
   // Move to next step when exercise hits 0
-  return goToNext(state, WORKOUT_PHASES);
+  return reduceNext(state, WORKOUT_PHASES);
 }
 
 function getCurrentExerciseDuration(state, phase) {
@@ -448,25 +448,25 @@ function scheduleRest(state, restDuration, nextAfterRest, restTypeFallback = "be
   return { ...state, ...nextAfterRest };
 }
 
-// ===== Elapsed seconds recalculation when going BACK =====
-// dataDuration = { restDuration, currentDuration, prevDuration }
-function recalcElapsedOnBack(currentSeconds, elapsedSeconds, isInRestingPrev, dataDuration) {
-  let newElapsed = elapsedSeconds;
+// // ===== Elapsed seconds recalculation when going BACK =====
+// // dataDuration = { restDuration, currentDuration, prevDuration }
+// function recalcElapsedOnBack(currentSeconds, elapsedSeconds, isInRestingPrev, dataDuration) {
+//   let newElapsed = elapsedSeconds;
 
-  if (isInRestingPrev) {
-    // We were inside a rest: roll back only the portion already spent in this rest.
-    // (restDuration - currentSeconds) is the elapsed part of the rest we need to undo.
-    newElapsed -= (dataDuration.restDuration - currentSeconds);
-  } else {
-    // We were on an exercise: roll back the rest before it + the part of current exercise that elapsed.
-    newElapsed -= (dataDuration.restDuration + (dataDuration.currentDuration - currentSeconds));
-  }
-  // Also roll back the full previous-step exercise (we're stepping to it)
-  newElapsed -= dataDuration.prevDuration;
+//   if (isInRestingPrev) {
+//     // We were inside a rest: roll back only the portion already spent in this rest.
+//     // (restDuration - currentSeconds) is the elapsed part of the rest we need to undo.
+//     newElapsed -= (dataDuration.restDuration - currentSeconds);
+//   } else {
+//     // We were on an exercise: roll back the rest before it + the part of current exercise that elapsed.
+//     newElapsed -= (dataDuration.restDuration + (dataDuration.currentDuration - currentSeconds));
+//   }
+//   // Also roll back the full previous-step exercise (we're stepping to it)
+//   newElapsed -= dataDuration.prevDuration;
 
-  if (newElapsed < 0) newElapsed = 0;
-  return newElapsed;
-}
+//   if (newElapsed < 0) newElapsed = 0;
+//   return newElapsed;
+// }
 
 // ===== Build the durations needed to back-step from current position =====
 function findBackStepDurations(state, currentPhase, phases) {
