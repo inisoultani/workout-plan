@@ -53,7 +53,7 @@ export function workoutTimerReducer(state, action) {
       };
     }
 
-    case ACTIONS.GO_TO_PREVIOUS:
+    case ACTIONS.GO_TO_PREVIOUS:{
       console.log("🔴 PREV - Before:", { 
         elapsedSeconds: state.elapsedSeconds, 
         remainingSeconds: state.seconds,
@@ -68,8 +68,9 @@ export function workoutTimerReducer(state, action) {
         newSeconds: prevResult.seconds
       });
       return prevResult;
+    }
 
-    case ACTIONS.TICK: 
+    case ACTIONS.TICK: {
       const tickResult = reduceTick(state);
       // Only log if elapsed seconds changed (to avoid spam)
       // if (tickResult.elapsedSeconds !== state.elapsedSeconds) {
@@ -81,6 +82,7 @@ export function workoutTimerReducer(state, action) {
       //   });
       // }
       return tickResult;
+    }
 
     case ACTIONS.RESET: {
       const initialSeconds = getInitialSeconds(WORKOUT_PHASES[state.phaseIndex], state.phaseIndex, state.supersetIndex, state.exerciseIndex);
@@ -90,12 +92,14 @@ export function workoutTimerReducer(state, action) {
         elapsedSeconds: state.elapsedSeconds - (initialSeconds - state.seconds)
       };
     }
-    case ACTIONS.RESTART:
+    
+    case ACTIONS.RESTART:{
       console.log("🔄 RESTART - Resetting elapsed seconds to 0");
       return { 
         ...INITIAL_WORKOUT_STATE, 
         seconds: getInitialSeconds(WORKOUT_PHASES[0], 0, 0, 0) 
       };
+    }
 
     default:
       return state;
