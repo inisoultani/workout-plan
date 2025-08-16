@@ -1,6 +1,6 @@
 import { DEFAULT_REST_BETWEEN_EXERCISE, DEFAULT_REST_BETWEEN_EXERCISE_IN_SET, DEFAULT_REST_BETWEEN_ROUNDS, DEFAULT_REST_BETWEEN_SET, DEFAULT_REST_BETWEEN_PHASE, WORKOUT_PHASES } from "@/constants/workoutTimerDefaults";
 import { WorkoutPrograms } from "@/data/workouts";
-import { getCurrentExercise, getInitialSeconds, getPhase, isCircuit, isLinear, isSuperset, recalculateElapsedSeconds } from "@/utils/workoutTimerLogic";
+import { getCurrentExercise, getCurrentWorkoutProgram, getInitialSeconds, getPhase, isCircuit, isLinear, isSuperset, recalculateElapsedSeconds } from "@/utils/workoutTimerLogic";
 
 export const ACTIONS = {
   START: "START",
@@ -102,14 +102,14 @@ export function workoutTimerReducer(state, action) {
     case ACTIONS.TICK: 
       const tickResult = reduceTick(state);
       // Only log if elapsed seconds changed (to avoid spam)
-      // if (tickResult.elapsedSeconds !== state.elapsedSeconds) {
-      //   console.log("⏱️ TICK - Elapsed:", { 
-      //     before: state.elapsedSeconds, 
-      //     after: tickResult.elapsedSeconds,
-      //     seconds: tickResult.seconds,
-      //     isResting: tickResult.isResting
-      //   });
-      // }
+      if (tickResult.elapsedSeconds !== state.elapsedSeconds) {
+        console.log("⏱️ TICK - Elapsed:", { 
+          before: state.elapsedSeconds, 
+          after: tickResult.elapsedSeconds,
+          seconds: tickResult.seconds,
+          isResting: tickResult.isResting
+        });
+      }
       return tickResult;
 
     case ACTIONS.RESET: {
@@ -245,7 +245,7 @@ function reduceNext(state, phases) {
 
   // --- Next Phase ---
   if (state.phaseIndex < phases.length - 1) {
-    const currentWorkout = getCurrentWorkout(phases); // Get workout program containing restBetweenPhase
+    const currentWorkout = getCurrentWorkoutProgram(phases); // Get workout program containing restBetweenPhase
     const nextPhase = phases[state.phaseIndex + 1];
     const restBetweenPhase = currentWorkout?.restBetweenPhase ?? DEFAULT_REST_BETWEEN_PHASE;
 
@@ -521,16 +521,15 @@ function restBetweenSetsForLinear(phase) {
 // ===== Utility: schedule a rest or jump directly if rest=0 =====
 function scheduleRest(state, restDuration, nextAfterRest, restTypeFallback = "betweenSet") {
   if (restDuration > 0) {
-    // Use explicit restTypeFallback for betweenPhase, otherwise infer
-    const inferredType = restTypeFallback === "betweenPhase" ? "betweenPhase" :
-      nextAfterRest.exerciseIndex === 0 ? "betweenSet" : "betweenExercise";
-
+    // Use the explicitly passed restTypeFallback - the calling code knows the correct type
+    const restType = restTypeFallback;
+    console.log('restType', restType);
     // Apply the next state immediately, store only the resume duration
     return {
       ...state,
       ...nextAfterRest,  // Apply all the next state changes immediately
       isResting: true,
-      restType: inferredType,
+      restType: restType,
       seconds: restDuration,
       nextAfterRest: { resume: nextAfterRest.resume }  // Only store the resume duration
     };
@@ -644,8 +643,8 @@ function findBackStepDurations(state, currentPhase, phases) {
   // ---- Fallback to previous PHASE ----
   if (phaseIndex > 0) {
     const prevPhase = phases[phaseIndex - 1];
-    const currentWorkout = getCurrentWorkout(phases);
-    const restBetweenPhase = currentWorkout?.restBetweenPhase ?? DEFAULT_REST_BETWEEN_PHASE;
+          const currentWorkout = getCurrentWorkoutProgram(phases);
+      const restBetweenPhase = currentWorkout?.restBetweenPhase ?? DEFAULT_REST_BETWEEN_PHASE;
     const currentFirstDuration = getCurrentExerciseDuration(
       { ...state, exerciseIndex: 0, supersetIndex: 0 }, // first exercise in current phase
       currentPhase
@@ -696,10 +695,4 @@ function findForwardStepDurations(state, currentPhase, phases) {
     // In EXERCISE: Add only remaining exercise time (no rest, no next exercise)
     return {};
   }
-}
-
-// ===== Get current workout program =====
-function getCurrentWorkout(phases) {
-  // Since we're using hardcoded WORKOUT_PHASES from Sunday, find Sunday workout
-  return WorkoutPrograms.find(program => program.day === "Sunday");
 }

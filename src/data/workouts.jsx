@@ -157,6 +157,7 @@ export const WorkoutPrograms = [
     day: "Monday",
     title: "Strength & Stability",
     focus: "Full-body strength + shoulder rehab",
+    restBetweenPhase: 60,
     phases: [
       {
         label: "Warm-Up",

@@ -57,6 +57,11 @@ export function getRestDuration(state, currentPhase) {
       : currentPhase?.restBetweenExercise ?? DEFAULT_REST_BETWEEN_EXERCISE_IN_SET;
   }
 
+  // Linear phase
+  if (state.restType === "betweenSet") {
+    return currentPhase.restBetweenSets ?? DEFAULT_REST_BETWEEN_SET;
+  }
+  
   if (state.restType === "betweenExercise") {
     return currentPhase.restBetweenExercise ?? DEFAULT_REST_BETWEEN_EXERCISE;
   }
@@ -105,7 +110,6 @@ export function totalSecondsWithActualFlow(workoutPhases) {
           total += superset.restBetweenSets || 0;
         }
       });
-      return total;
     }
 
     // Circuit phase
@@ -124,13 +128,11 @@ export function totalSecondsWithActualFlow(workoutPhases) {
           total += phase.restBetweenRounds || 0;
         }
       }
-      return total;
     }
 
     // Phase with fixed duration
     if (typeof phase.duration === "number") {
       total += phase.duration;
-      return total;
     }
 
     // Linear phase with exercises (non-circuit, non-superset)
@@ -155,7 +157,6 @@ export function totalSecondsWithActualFlow(workoutPhases) {
           total += phase.restBetweenExercise || 0;
         }
       });
-      return total;
     }
     
     // Add rest between phases (except after the last phase)
@@ -203,7 +204,7 @@ export function recalculateElapsedSeconds(currentSeconds, elapsedSeconds, isInRe
 // ===== Get current workout program =====
 export function getCurrentWorkoutProgram() {
   // Since we're using hardcoded WORKOUT_PHASES from Sunday, find Sunday workout
-  return WorkoutPrograms.find(program => program.day === "Sunday");
+  return WorkoutPrograms.find(program => program.day === "Monday");
 }
 
 export function getGroupInfo(state, phase) {
