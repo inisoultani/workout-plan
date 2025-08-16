@@ -201,7 +201,7 @@ export function recalculateElapsedSeconds(currentSeconds, elapsedSeconds, isInRe
 }
 
 // ===== Get current workout program =====
-function getCurrentWorkoutProgram() {
+export function getCurrentWorkoutProgram() {
   // Since we're using hardcoded WORKOUT_PHASES from Sunday, find Sunday workout
   return WorkoutPrograms.find(program => program.day === "Sunday");
 }

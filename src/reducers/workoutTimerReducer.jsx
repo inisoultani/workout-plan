@@ -644,6 +644,8 @@ function findBackStepDurations(state, currentPhase, phases) {
   // ---- Fallback to previous PHASE ----
   if (phaseIndex > 0) {
     const prevPhase = phases[phaseIndex - 1];
+    const currentWorkout = getCurrentWorkout(phases);
+    const restBetweenPhase = currentWorkout?.restBetweenPhase ?? DEFAULT_REST_BETWEEN_PHASE;
     const currentFirstDuration = getCurrentExerciseDuration(
       { ...state, exerciseIndex: 0, supersetIndex: 0 }, // first exercise in current phase
       currentPhase
@@ -654,7 +656,7 @@ function findBackStepDurations(state, currentPhase, phases) {
       const lastGroup = prevPhase.groups?.[lastGroupIdx];
       const lastIdx = (lastGroup?.exercises?.length ?? 1) - 1;
       return {
-        restDuration: 0, // you said no rest between phases
+        restDuration: restBetweenPhase, // Use restBetweenPhase instead of 0
         currentDuration: currentFirstDuration ?? 0,
         prevDuration: lastGroup?.exercises?.[lastIdx]?.duration ?? 0
       };
@@ -663,7 +665,7 @@ function findBackStepDurations(state, currentPhase, phases) {
     if (isCircuit(prevPhase)) {
       const lastIdx = (prevPhase.exercises?.length ?? 1) - 1;
       return {
-        restDuration: 0,
+        restDuration: restBetweenPhase, // Use restBetweenPhase instead of 0
         currentDuration: currentFirstDuration ?? 0,
         prevDuration: prevPhase.exercises?.[lastIdx]?.duration ?? 0
       };
@@ -672,7 +674,7 @@ function findBackStepDurations(state, currentPhase, phases) {
     // linear
     const lastIdx = (prevPhase.exercises?.length ?? 1) - 1;
     return {
-      restDuration: 0,
+      restDuration: restBetweenPhase, // Use restBetweenPhase instead of 0
       currentDuration: currentFirstDuration ?? 0,
       prevDuration: prevPhase.exercises?.[lastIdx]?.duration ?? 0
     };
