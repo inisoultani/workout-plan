@@ -1,4 +1,5 @@
-import { DEFAULT_REST_BETWEEN_EXERCISE, DEFAULT_REST_BETWEEN_EXERCISE_IN_SET, DEFAULT_REST_BETWEEN_ROUNDS, DEFAULT_REST_BETWEEN_SET } from "@/constants/workoutTimerDefaults";
+import { DEFAULT_REST_BETWEEN_EXERCISE, DEFAULT_REST_BETWEEN_EXERCISE_IN_SET, DEFAULT_REST_BETWEEN_ROUNDS, DEFAULT_REST_BETWEEN_SET, DEFAULT_REST_BETWEEN_PHASE } from "@/constants/workoutTimerDefaults";
+import { WorkoutPrograms } from "@/data/workouts";
 
 // export const isSupersetPhase = (phase) => !!phase.supersets;
 
@@ -38,6 +39,13 @@ export function getExercisesLength(state, currentPhase) {
 
 export function getRestDuration(state, currentPhase) {
   if (!state.isResting) return 0;
+  
+  // Handle rest between phases
+  if (state.restType === "betweenPhase") {
+    const currentWorkout = getCurrentWorkoutProgram();
+    return currentWorkout?.restBetweenPhase ?? DEFAULT_REST_BETWEEN_PHASE;
+  }
+  
   if (isSuperset(currentPhase)) {
     const superset = currentPhase.groups?.[state.supersetIndex];
     return state.restType === "betweenSet"
@@ -72,7 +80,10 @@ export function getInitialSeconds(currentPhase, phaseIdx, supersetIndex, exercis
 }
 
 export function totalSecondsWithActualFlow(workoutPhases) {
-  return workoutPhases.reduce((total, phase) => {
+  const currentWorkout = getCurrentWorkoutProgram();
+  const restBetweenPhase = currentWorkout?.restBetweenPhase ?? DEFAULT_REST_BETWEEN_PHASE;
+  
+  return workoutPhases.reduce((total, phase, phaseIndex) => {
     // Superset phase
     if (isSuperset(phase)) {
       phase.groups.forEach((superset, sIndex) => {
@@ -147,6 +158,11 @@ export function totalSecondsWithActualFlow(workoutPhases) {
       return total;
     }
     
+    // Add rest between phases (except after the last phase)
+    if (phaseIndex < workoutPhases.length - 1) {
+      total += restBetweenPhase;
+    }
+    
     return total;
   }, 0);
 }
@@ -154,9 +170,14 @@ export function totalSecondsWithActualFlow(workoutPhases) {
 // ===== Elapsed seconds recalculation when going BACK =====
 // dataDuration = { restDuration, currentDuration, prevDuration }
 export function recalculateElapsedSeconds(currentSeconds, elapsedSeconds, isInRestingPrev, dataDuration) {
-
   let newElapsed = elapsedSeconds;
-  console.log('calculateElapsedSeconds before racalculate : ', elapsedSeconds);
+  console.log('🧮 recalculateElapsedSeconds - Before:', { 
+    elapsedSeconds, 
+    currentSeconds, 
+    isInRestingPrev, 
+    dataDuration 
+  });
+  
   if (isInRestingPrev) {
     // We were inside a rest: roll back only the portion already spent in this rest.
     // (restDuration - currentSeconds) is the elapsed part of the rest we need to undo.
@@ -167,9 +188,22 @@ export function recalculateElapsedSeconds(currentSeconds, elapsedSeconds, isInRe
   }
   // Also roll back the full previous-step exercise (we're stepping to it)
   newElapsed -= dataDuration.prevDuration;
-  console.log('calculateElapsedSeconds after  racalculate : ', elapsedSeconds);
+  
   if (newElapsed < 0) newElapsed = 0;
+  
+  console.log('🧮 recalculateElapsedSeconds - After:', { 
+    before: elapsedSeconds, 
+    after: newElapsed, 
+    subtracted: elapsedSeconds - newElapsed 
+  });
+  
   return newElapsed;
+}
+
+// ===== Get current workout program =====
+function getCurrentWorkoutProgram() {
+  // Since we're using hardcoded WORKOUT_PHASES from Sunday, find Sunday workout
+  return WorkoutPrograms.find(program => program.day === "Sunday");
 }
 
 export function getGroupInfo(state, phase) {

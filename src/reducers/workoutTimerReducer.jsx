@@ -1,4 +1,5 @@
-import { DEFAULT_REST_BETWEEN_EXERCISE, DEFAULT_REST_BETWEEN_EXERCISE_IN_SET, DEFAULT_REST_BETWEEN_ROUNDS, DEFAULT_REST_BETWEEN_SET, WORKOUT_PHASES } from "@/constants/workoutTimerDefaults";
+import { DEFAULT_REST_BETWEEN_EXERCISE, DEFAULT_REST_BETWEEN_EXERCISE_IN_SET, DEFAULT_REST_BETWEEN_ROUNDS, DEFAULT_REST_BETWEEN_SET, DEFAULT_REST_BETWEEN_PHASE, WORKOUT_PHASES } from "@/constants/workoutTimerDefaults";
+import { WorkoutPrograms } from "@/data/workouts";
 import { getCurrentExercise, getInitialSeconds, getPhase, isCircuit, isLinear, isSuperset, recalculateElapsedSeconds } from "@/utils/workoutTimerLogic";
 
 export const ACTIONS = {
@@ -35,7 +36,7 @@ export const INITIAL_WORKOUT_STATE = {
 
 
 export function workoutTimerReducer(state, action) {
-  const phase = getPhase(WORKOUT_PHASES, state.phaseIndex);
+  // const phase = getPhase(WORKOUT_PHASES, state.phaseIndex);
   switch(action.type) {
     case ACTIONS.START:
       return { ...state, isRunning: true };
@@ -44,21 +45,72 @@ export function workoutTimerReducer(state, action) {
       return { ...state, isRunning: false };
 
     case ACTIONS.NEXT:
-      return reduceNext(state, WORKOUT_PHASES);
+      console.log("🟢 NEXT - Before:", { 
+        elapsedSeconds: state.elapsedSeconds, 
+        remainingSeconds: state.seconds,
+        exercise: state.exerciseIndex,
+        isResting: state.isResting
+      });
+      const nextResult = reduceNext(state, WORKOUT_PHASES);
+      const currentPhase = WORKOUT_PHASES[state.phaseIndex];
+      const forwardDur = findForwardStepDurations(state, currentPhase, WORKOUT_PHASES);
+      
+      // Simple logic: 
+      // If in EXERCISE: Add remaining exercise time
+      // If in REST: Add remaining rest time + full next exercise duration
+      let totalToAdd;
+      let breakdown;
+      
+      if (state.isResting) {
+        const nextExerciseDuration = forwardDur.nextExerciseDuration ?? 0;
+        totalToAdd = state.seconds + nextExerciseDuration;
+        breakdown = `${state.seconds}(remaining rest) + ${nextExerciseDuration}(next exercise)`;
+      } else {
+        totalToAdd = state.seconds;
+        breakdown = `${state.seconds}(remaining exercise)`;
+      }
+      
+      const newElapsedNext = state.elapsedSeconds + totalToAdd;
+      
+      console.log("🟢 NEXT - After:", { 
+        elapsedSeconds: newElapsedNext, 
+        addedTime: totalToAdd,
+        breakdown,
+        newExercise: nextResult.exerciseIndex 
+      });
+      return {
+        ...nextResult,
+        elapsedSeconds: newElapsedNext
+      };
 
     case ACTIONS.GO_TO_PREVIOUS:
-      return reduceGoToPrevious(state, WORKOUT_PHASES);
+      console.log("🔴 PREV - Before:", { 
+        elapsedSeconds: state.elapsedSeconds, 
+        remainingSeconds: state.seconds,
+        exercise: state.exerciseIndex,
+        isResting: state.isResting
+      });
+      const prevResult = reduceGoToPrevious(state, WORKOUT_PHASES);
+      console.log("🔴 PREV - After:", { 
+        elapsedSeconds: prevResult.elapsedSeconds, 
+        calculatedBy: "recalculateElapsedSeconds function",
+        newExercise: prevResult.exerciseIndex,
+        newSeconds: prevResult.seconds
+      });
+      return prevResult;
 
     case ACTIONS.TICK: 
-      return reduceTick(state);
-
-    //  case ACTIONS.NEXT:
-    //   return {
-    //     ...state,
-    //     elapsedSeconds: state.elapsedSeconds + state.seconds,
-    //     seconds: 0
-
-    //   };
+      const tickResult = reduceTick(state);
+      // Only log if elapsed seconds changed (to avoid spam)
+      // if (tickResult.elapsedSeconds !== state.elapsedSeconds) {
+      //   console.log("⏱️ TICK - Elapsed:", { 
+      //     before: state.elapsedSeconds, 
+      //     after: tickResult.elapsedSeconds,
+      //     seconds: tickResult.seconds,
+      //     isResting: tickResult.isResting
+      //   });
+      // }
+      return tickResult;
 
     case ACTIONS.RESET: {
       const initialSeconds = getInitialSeconds(WORKOUT_PHASES[state.phaseIndex], state.phaseIndex, state.supersetIndex, state.exerciseIndex);
@@ -69,9 +121,10 @@ export function workoutTimerReducer(state, action) {
       };
     }
     case ACTIONS.RESTART:
+      console.log("🔄 RESTART - Resetting elapsed seconds to 0");
       return { 
         ...INITIAL_WORKOUT_STATE, 
-        seconds: getInitialSeconds(workoutPhases[0], 0, 0, 0) 
+        seconds: getInitialSeconds(WORKOUT_PHASES[0], 0, 0, 0) 
       };
 
     default:
@@ -192,40 +245,39 @@ function reduceNext(state, phases) {
 
   // --- Next Phase ---
   if (state.phaseIndex < phases.length - 1) {
+    const currentWorkout = getCurrentWorkout(phases); // Get workout program containing restBetweenPhase
     const nextPhase = phases[state.phaseIndex + 1];
+    const restBetweenPhase = currentWorkout?.restBetweenPhase ?? DEFAULT_REST_BETWEEN_PHASE;
 
     if (isSuperset(nextPhase)) {
       const firstDur = nextPhase.groups?.[0]?.exercises?.[0]?.duration ?? 0;
-      return {
-        ...state,
+      return scheduleRest(state, restBetweenPhase, {
         phaseIndex: state.phaseIndex + 1,
         supersetIndex: 0,
         setCount: 1,
         exerciseIndex: 0,
-        seconds: firstDur
-      };
+        resume: firstDur
+      }, "betweenPhase");
     }
 
     if (isCircuit(nextPhase)) {
       const firstDur = nextPhase.exercises?.[0]?.duration ?? 0;
-      return {
-        ...state,
+      return scheduleRest(state, restBetweenPhase, {
         phaseIndex: state.phaseIndex + 1,
         exerciseIndex: 0,
         roundCount: 1,
-        seconds: firstDur
-      };
+        resume: firstDur
+      }, "betweenPhase");
     }
 
     // linear
     const firstDur = nextPhase.exercises?.[0]?.duration ?? 0;
-    return {
-      ...state,
+    return scheduleRest(state, restBetweenPhase, {
       phaseIndex: state.phaseIndex + 1,
       exerciseIndex: 0,
       exerciseSetCount: 1,
-      seconds: firstDur
-    };
+      resume: firstDur
+    }, "betweenPhase");
   }
 
   // End of workout
@@ -399,7 +451,6 @@ function reduceGoToPrevious(state, phases, isInRestingPrev = false) {
   return state;
 }
 
-
 function reduceTick(state) {
   if (!state.isRunning) return state;
 
@@ -470,22 +521,25 @@ function restBetweenSetsForLinear(phase) {
 // ===== Utility: schedule a rest or jump directly if rest=0 =====
 function scheduleRest(state, restDuration, nextAfterRest, restTypeFallback = "betweenSet") {
   if (restDuration > 0) {
-    // betweenSet covers: between-sets / between-groups / between-rounds
-    const inferredType =
+    // Use explicit restTypeFallback for betweenPhase, otherwise infer
+    const inferredType = restTypeFallback === "betweenPhase" ? "betweenPhase" :
       nextAfterRest.exerciseIndex === 0 ? "betweenSet" : "betweenExercise";
 
-    // FIXED: Apply the next state immediately, store only the resume duration
+    // Apply the next state immediately, store only the resume duration
     return {
       ...state,
       ...nextAfterRest,  // Apply all the next state changes immediately
       isResting: true,
-      restType: inferredType ?? restTypeFallback,
+      restType: inferredType,
       seconds: restDuration,
       nextAfterRest: { resume: nextAfterRest.resume }  // Only store the resume duration
     };
   }
   // no rest → immediate transition
-  return { ...state, ...nextAfterRest };
+  return { 
+    ...state, 
+    ...nextAfterRest
+  };
 }
 
 // ===== Build the durations needed to back-step from current position =====
@@ -626,4 +680,24 @@ function findBackStepDurations(state, currentPhase, phases) {
 
   // now at very beginning; nothing to subtract
   return { restDuration: 0, currentDuration: 0, prevDuration: 0 };
+}
+
+function findForwardStepDurations(state, currentPhase, phases) {
+  if (state.isResting) {
+    // In REST: Add remaining rest + full duration of next exercise
+    const nextResult = reduceNext(state, phases);
+    const nextExercise = getCurrentExercise(nextResult, phases[nextResult.phaseIndex]);
+    return { 
+      nextExerciseDuration: nextExercise?.duration ?? 0
+    };
+  } else {
+    // In EXERCISE: Add only remaining exercise time (no rest, no next exercise)
+    return {};
+  }
+}
+
+// ===== Get current workout program =====
+function getCurrentWorkout(phases) {
+  // Since we're using hardcoded WORKOUT_PHASES from Sunday, find Sunday workout
+  return WorkoutPrograms.find(program => program.day === "Sunday");
 }

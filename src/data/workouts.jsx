@@ -4,17 +4,18 @@ export const WorkoutPrograms = [
     day: "Sunday",
     title: "Full Body Strength",
     focus: "Functional strength and conditioning",
+    restBetweenPhase: 60,
     phases: [
       {
         label: "Warm-Up",
         type: "linear",
-        restBetweenExercise: 3,
+        restBetweenExercise: 60,
         exercises: [
-          { name: "Jump rope", duration: 3 },
-          { name: "Arm circle + shoulder roll", duration: 4 },
-          { name: "World's Greatest Stretch", duration: 3 },
-          { name: "TRX scapular pull", duration: 4 },
-          { name: "Bear Crawl maju-mundur", duration: 3 }
+          { name: "Jump rope", duration: 300 },
+          { name: "Arm circle + shoulder roll", duration: 60 },
+          { name: "World's Greatest Stretch", duration: 40 },
+          { name: "TRX scapular pull", duration: 52 },
+          { name: "Bear Crawl maju-mundur", duration: 53 }
         ]
       },
       {
@@ -27,8 +28,8 @@ export const WorkoutPrograms = [
             restBetweenSets: 20,
             restBetweenExercise: 20,
             exercises: [
-              { name: "Pull-up", duration: 50 },
-              { name: "Bear Hug Galon Squat", duration: 50 }
+              { name: "Pull-up", duration: 51 },
+              { name: "Bear Hug Galon Squat", duration: 52 }
             ]
           },
           {
