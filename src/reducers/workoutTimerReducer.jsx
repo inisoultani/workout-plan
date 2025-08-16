@@ -1,6 +1,6 @@
 import { DEFAULT_REST_BETWEEN_EXERCISE, DEFAULT_REST_BETWEEN_EXERCISE_IN_SET, DEFAULT_REST_BETWEEN_ROUNDS, DEFAULT_REST_BETWEEN_SET, DEFAULT_REST_BETWEEN_PHASE, WORKOUT_PHASES } from "@/constants/workoutTimerDefaults";
 import { WorkoutPrograms } from "@/data/workouts";
-import { getCurrentExercise, getCurrentWorkoutProgram, getInitialSeconds, getPhase, isCircuit, isLinear, isSuperset, recalculateElapsedSeconds } from "@/utils/workoutTimerLogic";
+import { calculateElapsedSecondsForNext, getCurrentExercise, getCurrentWorkoutProgram, getInitialSeconds, getPhase, isCircuit, isLinear, isSuperset, recalculateElapsedSeconds } from "@/utils/workoutTimerLogic";
 
 export const ACTIONS = {
   START: "START",
@@ -44,42 +44,14 @@ export function workoutTimerReducer(state, action) {
     case ACTIONS.PAUSE:
       return { ...state, isRunning: false };
 
-    case ACTIONS.NEXT:
-      console.log("🟢 NEXT - Before:", { 
-        elapsedSeconds: state.elapsedSeconds, 
-        remainingSeconds: state.seconds,
-        exercise: state.exerciseIndex,
-        isResting: state.isResting
-      });
+    case ACTIONS.NEXT: {
       const nextResult = reduceNext(state, WORKOUT_PHASES);
-      const currentPhase = WORKOUT_PHASES[state.phaseIndex];
-      
-      // Simple logic: 
-      // If in EXERCISE: Add remaining exercise time
-      // If in REST: Add remaining rest time + full skipped current exercise duration
-      let totalToAdd;
-      let breakdown;
-      
-      if (state.isResting) {
-        const currentExercise = getCurrentExercise(state, currentPhase);
-        totalToAdd = state.seconds + currentExercise.duration;
-        breakdown = `${state.seconds}(remaining rest) + ${currentExercise.duration}(current exercise) ` + currentExercise.name;
-      } else {
-        totalToAdd = state.seconds;
-        breakdown = `${state.seconds}(remaining exercise)`;
-      }
-      
-      const newElapsedNext = state.elapsedSeconds + totalToAdd;
-      
-      console.log("🟢 NEXT - After:", { 
-        elapsedSeconds: newElapsedNext, 
-        addedTime: totalToAdd,
-        breakdown
-      });
+      const newElapsedNext = calculateElapsedSecondsForNext(state);
       return {
         ...nextResult,
         elapsedSeconds: newElapsedNext
       };
+    }
 
     case ACTIONS.GO_TO_PREVIOUS:
       console.log("🔴 PREV - Before:", { 

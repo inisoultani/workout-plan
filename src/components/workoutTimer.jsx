@@ -1,6 +1,6 @@
 import { WORKOUT_PHASES } from "@/constants/workoutTimerDefaults";
 import { useWorkoutTimer } from "@/hooks/useWorkoutTImer";
-import { getCurrentExercise, getGroupInfo, getRestDuration, isSuperset, totalSecondsWithActualFlow } from "@/utils/workoutTimerLogic";
+import { getCurrentExercise, getGroupInfo, getRestDuration, totalSecondsWithActualFlow } from "@/utils/workoutTimerLogic";
 import TimerController from "./ui/TimerController";
 import WorkoutProgressBar from "./ui/WorkoutProgressBar";
 
