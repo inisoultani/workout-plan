@@ -53,18 +53,17 @@ export function workoutTimerReducer(state, action) {
       });
       const nextResult = reduceNext(state, WORKOUT_PHASES);
       const currentPhase = WORKOUT_PHASES[state.phaseIndex];
-      const forwardDur = findForwardStepDurations(state, currentPhase, WORKOUT_PHASES);
       
       // Simple logic: 
       // If in EXERCISE: Add remaining exercise time
-      // If in REST: Add remaining rest time + full next exercise duration
+      // If in REST: Add remaining rest time + full skipped current exercise duration
       let totalToAdd;
       let breakdown;
       
       if (state.isResting) {
-        const nextExerciseDuration = forwardDur.nextExerciseDuration ?? 0;
-        totalToAdd = state.seconds + nextExerciseDuration;
-        breakdown = `${state.seconds}(remaining rest) + ${nextExerciseDuration}(next exercise)`;
+        const currentExercise = getCurrentExercise(state, currentPhase);
+        totalToAdd = state.seconds + currentExercise.duration;
+        breakdown = `${state.seconds}(remaining rest) + ${currentExercise.duration}(current exercise) ` + currentExercise.name;
       } else {
         totalToAdd = state.seconds;
         breakdown = `${state.seconds}(remaining exercise)`;
@@ -75,8 +74,7 @@ export function workoutTimerReducer(state, action) {
       console.log("🟢 NEXT - After:", { 
         elapsedSeconds: newElapsedNext, 
         addedTime: totalToAdd,
-        breakdown,
-        newExercise: nextResult.exerciseIndex 
+        breakdown
       });
       return {
         ...nextResult,
@@ -102,14 +100,14 @@ export function workoutTimerReducer(state, action) {
     case ACTIONS.TICK: 
       const tickResult = reduceTick(state);
       // Only log if elapsed seconds changed (to avoid spam)
-      if (tickResult.elapsedSeconds !== state.elapsedSeconds) {
-        console.log("⏱️ TICK - Elapsed:", { 
-          before: state.elapsedSeconds, 
-          after: tickResult.elapsedSeconds,
-          seconds: tickResult.seconds,
-          isResting: tickResult.isResting
-        });
-      }
+      // if (tickResult.elapsedSeconds !== state.elapsedSeconds) {
+      //   console.log("⏱️ TICK - Elapsed:", { 
+      //     before: state.elapsedSeconds, 
+      //     after: tickResult.elapsedSeconds,
+      //     seconds: tickResult.seconds,
+      //     isResting: tickResult.isResting
+      //   });
+      // }
       return tickResult;
 
     case ACTIONS.RESET: {
@@ -465,6 +463,7 @@ function reduceTick(state) {
     }
     // Rest finished → restore exercise duration
     const next = state.nextAfterRest ?? {};
+
     return {
       ...state,
       isResting: false,
@@ -689,7 +688,8 @@ function findForwardStepDurations(state, currentPhase, phases) {
     const nextResult = reduceNext(state, phases);
     const nextExercise = getCurrentExercise(nextResult, phases[nextResult.phaseIndex]);
     return { 
-      nextExerciseDuration: nextExercise?.duration ?? 0
+      nextExerciseDuration: nextExercise?.duration ?? 0,
+      nextExerciseName: nextExercise?.name ?? ""
     };
   } else {
     // In EXERCISE: Add only remaining exercise time (no rest, no next exercise)

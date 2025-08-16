@@ -7,13 +7,13 @@ export default function WorkoutProgressBar({state, currentPhase, currentExercise
   const exerciseIndexProgress = ((state.exerciseIndex + 1) / getExercisesLength(state, currentPhase)) * 100;
   const totalProgress = (state.elapsedSeconds / totalSeconds) * 100;
 
-  if(state.isResting) { 
-    console.log("state.restType", state.restType);
-    console.log("state.isResting", state.isResting);
-    console.log("restDuration", restDuration);
-    console.log("state.seconds", state.seconds);
-    console.log("restProgress", restProgress);
-  }
+  // if(state.isResting) { 
+  //   console.log("state.restType", state.restType);
+  //   console.log("state.isResting", state.isResting);
+  //   console.log("restDuration", restDuration);
+  //   console.log("state.seconds", state.seconds);
+  //   console.log("restProgress", restProgress);
+  // }
   
   return (
     <>
