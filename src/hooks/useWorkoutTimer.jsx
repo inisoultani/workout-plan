@@ -1,13 +1,13 @@
-import { WORKOUT_PHASES } from "@/constants/workoutTimerDefaults";
+import { DEFAULT_TICK_INTERVAL } from "@/constants/workoutTimerDefaults";
 import { ACTIONS, workoutTimerReducer, INITIAL_WORKOUT_STATE } from "@/reducers/workoutTimerReducer";
-import { getInitialSeconds } from "@/utils/workoutTimerLogic";
+import { getCurrentWorkoutProgram, getInitialSeconds } from "@/utils/workoutTimerLogic";
 import { useEffect, useReducer, useRef } from "react";
 
-export function useWorkoutTimer() {
-
+export function useWorkoutTimer(selectedDay) {
   const [state, dispatch] = useReducer(workoutTimerReducer, {
     ...INITIAL_WORKOUT_STATE,
-    seconds: getInitialSeconds(WORKOUT_PHASES[0], 0, 0, 0)
+    seconds: getInitialSeconds(getCurrentWorkoutProgram(selectedDay).phases[0], 0, 0, 0),
+    selectedDay: selectedDay
   });
   const timerRef = useRef(null);
 
@@ -17,7 +17,7 @@ export function useWorkoutTimer() {
         // console.log('elapsedSeconds before TICK : ', state.elapsedSeconds);
         dispatch({ type: ACTIONS.TICK });
         // console.log('elapsedSeconds after  TICK : ', state.elapsedSeconds);
-      }, 1000);
+      }, DEFAULT_TICK_INTERVAL);
     }
     return () => clearInterval(timerRef.current);
   }, [state.isRunning]);

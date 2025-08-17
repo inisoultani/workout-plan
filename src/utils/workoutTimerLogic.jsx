@@ -1,4 +1,4 @@
-import { DEFAULT_REST_BETWEEN_EXERCISE, DEFAULT_REST_BETWEEN_EXERCISE_IN_SET, DEFAULT_REST_BETWEEN_ROUNDS, DEFAULT_REST_BETWEEN_SET, DEFAULT_REST_BETWEEN_PHASE, WORKOUT_PHASES } from "@/constants/workoutTimerDefaults";
+import { DEFAULT_REST_BETWEEN_EXERCISE, DEFAULT_REST_BETWEEN_EXERCISE_IN_SET, DEFAULT_REST_BETWEEN_ROUNDS, DEFAULT_REST_BETWEEN_SET, DEFAULT_REST_BETWEEN_PHASE } from "@/constants/workoutTimerDefaults";
 import { WorkoutPrograms } from "@/data/workouts";
 
 
@@ -45,7 +45,7 @@ export function getRestDuration(state, currentPhase) {
   
   // Handle rest between phases
   if (state.restType === "betweenPhase") {
-    const currentWorkout = getCurrentWorkoutProgram();
+    const currentWorkout = getCurrentWorkoutProgram(state.selectedDay);
     return currentWorkout?.restBetweenPhase ?? DEFAULT_REST_BETWEEN_PHASE;
   }
   
@@ -85,8 +85,8 @@ export function getInitialSeconds(currentPhase, phaseIdx, supersetIndex, exercis
 }
 
 /** Calculates the total workout duration including all exercises and rest periods */
-export function totalSecondsWithActualFlow(workoutPhases) {
-  const currentWorkout = getCurrentWorkoutProgram();
+export function totalSecondsWithActualFlow(selectedDay, workoutPhases) {
+  const currentWorkout = getCurrentWorkoutProgram(selectedDay);
   const restBetweenPhase = currentWorkout?.restBetweenPhase ?? DEFAULT_REST_BETWEEN_PHASE;
   
   return workoutPhases.reduce((total, phase, phaseIndex) => {
@@ -203,9 +203,9 @@ export function recalculateElapsedSeconds(currentSeconds, elapsedSeconds, isInRe
 }
 
 /** Gets the current workout program (hardcoded to Sunday) */
-export function getCurrentWorkoutProgram() {
+export function getCurrentWorkoutProgram(day = "Sunday") {
   // Since we're using hardcoded WORKOUT_PHASES from Sunday, find Sunday workout
-  return WorkoutPrograms.find(program => program.day === "Sunday");
+  return WorkoutPrograms.find(program => program.day.toLowerCase() === day.toLowerCase());
 }
 
 /** Gets display information for the current group/set/round based on phase type */
@@ -436,7 +436,7 @@ export function findBackStepDurations(state, currentPhase, phases) {
   // ---- Fallback to previous PHASE ----
   if (phaseIndex > 0) {
     const prevPhase = phases[phaseIndex - 1];
-    const currentWorkout = getCurrentWorkoutProgram(phases);
+    const currentWorkout = getCurrentWorkoutProgram(state.selectedDay);
     const restBetweenPhase = currentWorkout?.restBetweenPhase ?? DEFAULT_REST_BETWEEN_PHASE;
     const currentFirstDuration = getCurrentExerciseDuration(
       { ...state, exerciseIndex: 0, supersetIndex: 0 }, // first exercise in current phase
