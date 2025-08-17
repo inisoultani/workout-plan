@@ -1,0 +1,71 @@
+import { useState } from "react";
+import { WorkoutPrograms } from "@/data/workouts"; // your dataset
+
+export default function WorkoutSelector() {
+  const [selectedDay, setSelectedDay] = useState(
+    new Date().toLocaleDateString("en-US", { weekday: "long" })
+  );
+
+  const todayWorkout = WorkoutPrograms.find(p => p.day === selectedDay);
+
+  return (
+    <div className="min-h-screen bg-black text-white p-6 flex flex-col">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">🏋️ My Workout App</h1>
+        <span className="text-gray-400">Today: {selectedDay}</span>
+      </div>
+
+      {/* Day Selector */}
+      <div className="flex space-x-2 overflow-x-auto pb-4 mb-6">
+        {WorkoutPrograms.map(p => (
+          <button
+            key={p.day}
+            onClick={() => setSelectedDay(p.day)}
+            className={`px-4 py-2 rounded-full transition ${
+              selectedDay === p.day
+                ? "bg-green-600 text-white"
+                : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+            }`}
+          >
+            {p.day}
+          </button>
+        ))}
+      </div>
+
+      {/* Workout Preview */}
+      <div className="flex-1 space-y-3">
+        {todayWorkout ? (
+          todayWorkout.phases.map((phase, i) => (
+            <div
+              key={i}
+              className="bg-gray-800 p-4 rounded-xl shadow-md flex justify-between items-center"
+            >
+              <div>
+                <h2 className="text-lg font-semibold">{phase.label}</h2>
+                <p className="text-sm text-gray-400">{phase.type}</p>
+              </div>
+              <div className="text-sm text-gray-300">
+                {phase.type === "superset" &&
+                  `${phase.groups.length} groups × ${phase.groups[0].sets} sets`}
+                {phase.type === "circuit" &&
+                  `${phase.rounds} rounds • ${phase.exercises.length} exercises`}
+                {phase.type === "linear" &&
+                  `${phase.exercises.length} exercises`}
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-400">No workout found for {selectedDay}</p>
+        )}
+      </div>
+
+      {/* Start Workout */}
+      {todayWorkout && (
+        <button className="mt-6 bg-green-600 hover:bg-green-500 text-lg font-bold py-3 rounded-xl shadow-lg">
+          ▶ Start Workout
+        </button>
+      )}
+    </div>
+  );
+}

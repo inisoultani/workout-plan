@@ -1,10 +1,11 @@
 import './App.css'
+import WorkoutSelector from './components/WorkoutSelector';
 import WorkoutTimer from './components/WorkoutTimer'
-import { WorkoutPrograms } from './data/workouts';
 
 function App() {
   return (
     <>
+      <div><WorkoutSelector /></div>
       <div><WorkoutTimer /></div>
     </>
   )
