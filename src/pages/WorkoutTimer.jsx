@@ -1,22 +1,28 @@
-import { WORKOUT_PHASES } from "@/constants/workoutTimerDefaults";
 import { useWorkoutTimer } from "@/hooks/useWorkoutTImer";
 import { getCurrentExercise, getCurrentWorkoutProgram, getGroupInfo, getRestDuration, totalSecondsWithActualFlow } from "@/utils/workoutTimerLogic";
 import TimerController from "../components/ui/TimerController";
 import WorkoutProgressBar from "../components/ui/WorkoutProgressBar";
+import { useNavigate, useParams } from "react-router-dom";
 
-export default function WorkoutTimer({ selectedDay, onExit }) {
+export default function WorkoutTimer() {
  
-  const {state, dispatch} = useWorkoutTimer(selectedDay); 
-  const selectedProgram = getCurrentWorkoutProgram(selectedDay);
-  const totalSeconds = totalSecondsWithActualFlow(selectedProgram.phases);
+  const { day } = useParams();
+  const navigate = useNavigate();
+  const {state, dispatch} = useWorkoutTimer(day); 
+  const selectedProgram = getCurrentWorkoutProgram(day);
+  const totalSeconds = totalSecondsWithActualFlow(day, selectedProgram.phases);
   const currentPhase = selectedProgram.phases[state.phaseIndex];
   const restDuration = getRestDuration(state, currentPhase);
   const currentExercise = getCurrentExercise(state, currentPhase);
   const groupInfo = getGroupInfo(state, currentPhase)
 
+  function navigateToWorkoutSelector() {
+    navigate("/");
+  }
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
+      <h2 className="text-xl mb-1">Workout Program : {day.toUpperCase()}</h2>
       <h1 className="text-4xl font-bold mb-2">{currentExercise.name}</h1>
       <h2 className="text-xl mb-1">Phase: {currentPhase.label}</h2>
       {groupInfo && (
@@ -34,7 +40,7 @@ export default function WorkoutTimer({ selectedDay, onExit }) {
       <TimerController dispatch={dispatch} />
       <button
         className="mt-6 px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-lg font-semibold"
-        onClick={onExit}
+        onClick={navigateToWorkoutSelector}
         type="button">
         Exit
       </button>

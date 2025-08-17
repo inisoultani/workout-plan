@@ -1,6 +1,5 @@
-import { DEFAULT_REST_BETWEEN_EXERCISE, DEFAULT_REST_BETWEEN_EXERCISE_IN_SET, DEFAULT_REST_BETWEEN_ROUNDS, DEFAULT_REST_BETWEEN_SET, DEFAULT_REST_BETWEEN_PHASE, WORKOUT_PHASES } from "@/constants/workoutTimerDefaults";
-import { WorkoutPrograms } from "@/data/workouts";
-import { calculateElapsedSecondsForNext, findBackStepDurations, getCurrentExercise, getCurrentExerciseDuration, getCurrentWorkoutProgram, getInitialSeconds, getPhase, isCircuit, isLinear, isSuperset, recalculateElapsedSeconds, restBetweenExerciseForPhase, restBetweenRoundsForCircuit, restBetweenSetsForLinear, restBetweenSetsForSuperset, scheduleRest } from "@/utils/workoutTimerLogic";
+import { DEFAULT_REST_BETWEEN_PHASE } from "@/constants/workoutTimerDefaults";
+import { calculateElapsedSecondsForNext, findBackStepDurations, getCurrentExercise, getCurrentWorkoutProgram, getInitialSeconds, getPhase, isCircuit, isLinear, isSuperset, recalculateElapsedSeconds, restBetweenExerciseForPhase, restBetweenRoundsForCircuit, restBetweenSetsForLinear, restBetweenSetsForSuperset, scheduleRest } from "@/utils/workoutTimerLogic";
 
 export const ACTIONS = {
   START: "START",
@@ -93,6 +92,7 @@ export function workoutTimerReducer(state, action) {
       console.log("🔄 RESTART - Resetting elapsed seconds to 0");
       return { 
         ...INITIAL_WORKOUT_STATE, 
+        selectedDay: state.selectedDay,
         seconds: getInitialSeconds(getCurrentWorkoutProgram(state.selectedDay).phases[0], 0, 0, 0) 
       };
     }

@@ -1,12 +1,17 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { WorkoutPrograms } from "@/data/workouts"; // your dataset
 
-export default function WorkoutSelector({ onStart }) {
+export default function WorkoutSelector() {
   const [selectedDay, setSelectedDay] = useState(
     new Date().toLocaleDateString("en-US", { weekday: "long" })
   );
-
+  const navigate = useNavigate();
   const todayWorkout = WorkoutPrograms.find(p => p.day === selectedDay);
+
+  function navigateToWorkoutProgram() {
+    navigate(`/program/${selectedDay.toLowerCase()}`);
+  }
 
   return (
     <div className="min-h-screen bg-black text-white p-6 flex flex-col">
@@ -62,7 +67,7 @@ export default function WorkoutSelector({ onStart }) {
 
       {/* Start Workout */}
       {todayWorkout && (
-        <button onClick={() => onStart(todayWorkout)} className="mt-6 bg-green-600 hover:bg-green-500 text-lg font-bold py-3 rounded-xl shadow-lg">
+        <button onClick={navigateToWorkoutProgram} className="mt-6 bg-green-600 hover:bg-green-500 text-lg font-bold py-3 rounded-xl shadow-lg">
           ▶ Start Workout
         </button>
       )}
