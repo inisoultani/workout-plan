@@ -1,8 +1,8 @@
 import { WORKOUT_PHASES } from "@/constants/workoutTimerDefaults";
 import { useWorkoutTimer } from "@/hooks/useWorkoutTImer";
 import { getCurrentExercise, getCurrentWorkoutProgram, getGroupInfo, getRestDuration, totalSecondsWithActualFlow } from "@/utils/workoutTimerLogic";
-import TimerController from "./ui/TimerController";
-import WorkoutProgressBar from "./ui/WorkoutProgressBar";
+import TimerController from "../components/ui/TimerController";
+import WorkoutProgressBar from "../components/ui/WorkoutProgressBar";
 
 export default function WorkoutTimer({ selectedDay, onExit }) {
  

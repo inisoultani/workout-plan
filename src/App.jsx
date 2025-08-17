@@ -1,18 +1,7 @@
 import { useState } from 'react';
 import './App.css'
-import WorkoutSelector from './components/WorkoutSelector';
-import WorkoutTimer from './components/WorkoutTimer'
-
-// function App() {
-//   return (
-//     <>
-//       <div><WorkoutSelector /></div>
-//       <div><WorkoutTimer /></div>
-//     </>
-//   )
-// }
-
-export default App
+import WorkoutSelector from './pages/WorkoutSelector';
+import WorkoutTimer from './pages/WorkoutTimer'
 
 function App() {
   const [screen, setScreen] = useState("selector");
@@ -39,3 +28,5 @@ function App() {
     />
   );
 }
+
+export default App
