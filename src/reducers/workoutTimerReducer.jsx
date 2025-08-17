@@ -31,7 +31,8 @@ export const INITIAL_WORKOUT_STATE = {
   isResting: false,
   restType: null,        // "betweenExercise" | "betweenSet" (we also use "betweenSet" for between-group/round)
   nextAfterRest: null,   // shape: { resume } - simplified since state changes applied immediately
-  elapsedSeconds: 0      // total time actually ticked so far
+  elapsedSeconds: 0,      // total time actually ticked so far
+  selectedDay: null
 };
 
 
@@ -45,7 +46,7 @@ export function workoutTimerReducer(state, action) {
       return { ...state, isRunning: false };
 
     case ACTIONS.NEXT: {
-      return reduceNext(state, WORKOUT_PHASES);
+      return reduceNext(state, getCurrentWorkoutProgram(state.selectedDay).phases);
     }
 
     case ACTIONS.GO_TO_PREVIOUS:{
@@ -55,7 +56,7 @@ export function workoutTimerReducer(state, action) {
         exercise: state.exerciseIndex,
         isResting: state.isResting
       });
-      const prevResult = reduceGoToPrevious(state, WORKOUT_PHASES);
+      const prevResult = reduceGoToPrevious(state, getCurrentWorkoutProgram(state.selectedDay).phases);
       console.log("🔴 PREV - After:", { 
         elapsedSeconds: prevResult.elapsedSeconds, 
         calculatedBy: "recalculateElapsedSeconds function",
@@ -80,7 +81,7 @@ export function workoutTimerReducer(state, action) {
     }
 
     case ACTIONS.RESET: {
-      const initialSeconds = getInitialSeconds(WORKOUT_PHASES[state.phaseIndex], state.phaseIndex, state.supersetIndex, state.exerciseIndex);
+      const initialSeconds = getInitialSeconds(getCurrentWorkoutProgram(state.selectedDay).phases[state.phaseIndex], state.phaseIndex, state.supersetIndex, state.exerciseIndex);
       return { 
         ...state, 
         seconds: initialSeconds,
@@ -92,7 +93,7 @@ export function workoutTimerReducer(state, action) {
       console.log("🔄 RESTART - Resetting elapsed seconds to 0");
       return { 
         ...INITIAL_WORKOUT_STATE, 
-        seconds: getInitialSeconds(WORKOUT_PHASES[0], 0, 0, 0) 
+        seconds: getInitialSeconds(getCurrentWorkoutProgram(state.selectedDay).phases[0], 0, 0, 0) 
       };
     }
 
@@ -223,7 +224,7 @@ function reduceNext(state, phases) {
 
   // --- Next Phase ---
   if (state.phaseIndex < phases.length - 1) {
-    const currentWorkout = getCurrentWorkoutProgram(phases); // Get workout program containing restBetweenPhase
+    const currentWorkout = getCurrentWorkoutProgram(state.selectedDay); // Get workout program containing restBetweenPhase
     const nextPhase = phases[state.phaseIndex + 1];
     const restBetweenPhase = currentWorkout?.restBetweenPhase ?? DEFAULT_REST_BETWEEN_PHASE;
 
@@ -468,6 +469,6 @@ function reduceTick(state) {
   }
 
   // Move to next step when exercise hits 0
-  return reduceNext(state, WORKOUT_PHASES);
+  return reduceNext(state, getCurrentWorkoutProgram(state.selectedDay).phases);
 }
 
