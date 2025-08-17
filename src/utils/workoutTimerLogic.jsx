@@ -244,7 +244,7 @@ export function getGroupInfo(state, phase) {
 }
 
 /** Calculates elapsed time when advancing forward in the timer */
-export function calculateElapsedSecondsForNext(state) {
+export function calculateElapsedSecondsForNext(state, currentPhase) {
   console.log("🟢 NEXT - Before:", { 
     elapsedSeconds: state.elapsedSeconds, 
     remainingSeconds: state.seconds,
@@ -252,8 +252,6 @@ export function calculateElapsedSecondsForNext(state) {
     isResting: state.isResting
   });
 
-  const currentPhase = WORKOUT_PHASES[state.phaseIndex];
-      
   // Simple logic: 
   // If in EXERCISE: Add remaining exercise time
   // If in REST: Add remaining rest time + full skipped current exercise duration
@@ -269,13 +267,13 @@ export function calculateElapsedSecondsForNext(state) {
     breakdown = `${state.seconds}(remaining exercise)`;
   }
   
-  const newElapsedNext = state.elapsedSeconds + totalToAdd;
+  //const newElapsedNext = state.elapsedSeconds + totalToAdd;
   console.log("🟢 NEXT - After:", { 
-    elapsedSeconds: newElapsedNext, 
+    elapsedSeconds: state.elapsedSeconds + totalToAdd, 
     addedTime: totalToAdd,
     breakdown
   });
-  return newElapsedNext;
+  return totalToAdd;
 }
 
 /** Gets the duration of the current exercise */

@@ -45,12 +45,7 @@ export function workoutTimerReducer(state, action) {
       return { ...state, isRunning: false };
 
     case ACTIONS.NEXT: {
-      const nextResult = reduceNext(state, WORKOUT_PHASES);
-      const newElapsedNext = calculateElapsedSecondsForNext(state);
-      return {
-        ...nextResult,
-        elapsedSeconds: newElapsedNext
-      };
+      return reduceNext(state, WORKOUT_PHASES);
     }
 
     case ACTIONS.GO_TO_PREVIOUS:{
@@ -106,11 +101,13 @@ export function workoutTimerReducer(state, action) {
   }
 }
 
-
 /** Navigation: NEXT */
 function reduceNext(state, phases) {
   const phase = getPhase(phases, state.phaseIndex);
   if (!phase) return { ...state, isRunning: false };
+
+  // Calculate elapsed time before any state transitions
+  const elapsedTimeToAdd = calculateElapsedSecondsForNext(state, phase);
 
   // --- Superset (groups/sets) ---
   if (isSuperset(phase)) {
@@ -121,25 +118,27 @@ function reduceNext(state, phases) {
     if (state.exerciseIndex < exs.length - 1) {
       const rest = restBetweenExerciseForPhase(phase, state.supersetIndex);
       const nextIdx = state.exerciseIndex + 1;
-      return scheduleRest(state, rest, {
+      const result = scheduleRest(state, rest, {
         phaseIndex: state.phaseIndex,
         supersetIndex: state.supersetIndex,
         setCount: state.setCount,
         exerciseIndex: nextIdx,
         resume: exs[nextIdx]?.duration ?? 0
       }, "betweenExercise");
+      return { ...result, elapsedSeconds: state.elapsedSeconds + elapsedTimeToAdd };
     }
 
     // end of set → next set
     if (state.setCount < (group?.sets ?? 1)) {
       const rest = restBetweenSetsForSuperset(phase, state.supersetIndex);
-      return scheduleRest(state, rest, {
+      const result = scheduleRest(state, rest, {
         phaseIndex: state.phaseIndex,
         supersetIndex: state.supersetIndex,
         setCount: state.setCount + 1,
         exerciseIndex: 0,
         resume: exs[0]?.duration ?? 0
       }, "betweenSet");
+      return { ...result, elapsedSeconds: state.elapsedSeconds + elapsedTimeToAdd };
     }
 
     // end of group → next group
@@ -147,13 +146,14 @@ function reduceNext(state, phases) {
       const nextGroup = phase.groups?.[state.supersetIndex + 1];
       // as per your behavior: reuse restBetweenSets as "between groups"
       const rest = restBetweenSetsForSuperset(phase, state.supersetIndex);
-      return scheduleRest(state, rest, {
+      const result = scheduleRest(state, rest, {
         phaseIndex: state.phaseIndex,
         supersetIndex: state.supersetIndex + 1,
         setCount: 1,
         exerciseIndex: 0,
         resume: nextGroup?.exercises?.[0]?.duration ?? 0
       }, "betweenSet");
+      return { ...result, elapsedSeconds: state.elapsedSeconds + elapsedTimeToAdd };
     }
   }
 
@@ -165,23 +165,25 @@ function reduceNext(state, phases) {
     if (state.exerciseIndex < exs.length - 1) {
       const rest = restBetweenExerciseForPhase(phase);
       const nextIdx = state.exerciseIndex + 1;
-      return scheduleRest(state, rest, {
+      const result = scheduleRest(state, rest, {
         phaseIndex: state.phaseIndex,
         exerciseIndex: nextIdx,
         roundCount: state.roundCount,
         resume: exs[nextIdx]?.duration ?? 0
       }, "betweenExercise");
+      return { ...result, elapsedSeconds: state.elapsedSeconds + elapsedTimeToAdd };
     }
 
     // end of round → next round
     if (state.roundCount < (phase.rounds ?? 1)) {
       const rest = restBetweenRoundsForCircuit(phase);
-      return scheduleRest(state, rest, {
+      const result = scheduleRest(state, rest, {
         phaseIndex: state.phaseIndex,
         exerciseIndex: 0,
         roundCount: state.roundCount + 1,
         resume: exs[0]?.duration ?? 0
       }, "betweenSet"); // we reuse betweenSet label for "between rounds"
+      return { ...result, elapsedSeconds: state.elapsedSeconds + elapsedTimeToAdd };
     }
   }
 
@@ -195,12 +197,13 @@ function reduceNext(state, phases) {
       // within same exercise → next set
       if (state.exerciseSetCount < currentExercise.sets) {
         const rest = restBetweenSetsForLinear(phase);
-        return scheduleRest(state, rest, {
+        const result = scheduleRest(state, rest, {
           phaseIndex: state.phaseIndex,
           exerciseIndex: state.exerciseIndex,
           exerciseSetCount: state.exerciseSetCount + 1,
           resume: currentExercise.duration ?? 0
         }, "betweenSet");
+        return { ...result, elapsedSeconds: state.elapsedSeconds + elapsedTimeToAdd };
       }
     }
 
@@ -208,12 +211,13 @@ function reduceNext(state, phases) {
     if (state.exerciseIndex < exs.length - 1) {
       const rest = restBetweenExerciseForPhase(phase);
       const nextIdx = state.exerciseIndex + 1;
-      return scheduleRest(state, rest, {
+      const result = scheduleRest(state, rest, {
         phaseIndex: state.phaseIndex,
         exerciseIndex: nextIdx,
         exerciseSetCount: 1,
         resume: exs[nextIdx]?.duration ?? 0
       }, "betweenExercise");
+      return { ...result, elapsedSeconds: state.elapsedSeconds + elapsedTimeToAdd };
     }
   }
 
@@ -225,37 +229,40 @@ function reduceNext(state, phases) {
 
     if (isSuperset(nextPhase)) {
       const firstDur = nextPhase.groups?.[0]?.exercises?.[0]?.duration ?? 0;
-      return scheduleRest(state, restBetweenPhase, {
+      const result = scheduleRest(state, restBetweenPhase, {
         phaseIndex: state.phaseIndex + 1,
         supersetIndex: 0,
         setCount: 1,
         exerciseIndex: 0,
         resume: firstDur
       }, "betweenPhase");
+      return { ...result, elapsedSeconds: state.elapsedSeconds + elapsedTimeToAdd };
     }
 
     if (isCircuit(nextPhase)) {
       const firstDur = nextPhase.exercises?.[0]?.duration ?? 0;
-      return scheduleRest(state, restBetweenPhase, {
+      const result = scheduleRest(state, restBetweenPhase, {
         phaseIndex: state.phaseIndex + 1,
         exerciseIndex: 0,
         roundCount: 1,
         resume: firstDur
       }, "betweenPhase");
+      return { ...result, elapsedSeconds: state.elapsedSeconds + elapsedTimeToAdd };
     }
 
     // linear
     const firstDur = nextPhase.exercises?.[0]?.duration ?? 0;
-    return scheduleRest(state, restBetweenPhase, {
+    const result = scheduleRest(state, restBetweenPhase, {
       phaseIndex: state.phaseIndex + 1,
       exerciseIndex: 0,
       exerciseSetCount: 1,
       resume: firstDur
     }, "betweenPhase");
+    return { ...result, elapsedSeconds: state.elapsedSeconds + elapsedTimeToAdd };
   }
 
   // End of workout
-  return { ...state, isRunning: false };
+  return { ...state, isRunning: false, elapsedSeconds: state.elapsedSeconds + elapsedTimeToAdd };
 }
 
 /** Navigation: PREVIOUS (with elapsedSeconds rollback) */
