@@ -273,13 +273,11 @@ function reduceGoToPrevious(state, phases, isInRestingPrev = false) {
 
   // If currently resting, cancel rest and restore current exercise duration
   if (state.isResting) {
-    const currentExercise = getCurrentExercise(state, phase);
     const cleared = {
       ...state,
       isResting: false,
       restType: null,
       nextAfterRest: null,
-      // seconds: currentExercise?.duration ?? 0  // Restore current exercise duration
     };
     return reduceGoToPrevious(cleared, phases, true);
   }
