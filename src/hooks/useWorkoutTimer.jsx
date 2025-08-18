@@ -1,3 +1,4 @@
+import { DEFAULT_TICK_INTERVAL } from "@/constants/workoutTimerDefaults";
 import { ACTIONS, workoutTimerReducer, INITIAL_WORKOUT_STATE } from "@/reducers/workoutTimerReducer";
 import { getCurrentWorkoutProgram, getInitialSeconds } from "@/utils/workoutTimerLogic";
 import { useEffect, useReducer, useRef } from "react";
@@ -16,7 +17,7 @@ export function useWorkoutTimer(selectedDay) {
         // console.log('elapsedSeconds before TICK : ', state.elapsedSeconds);
         dispatch({ type: ACTIONS.TICK });
         // console.log('elapsedSeconds after  TICK : ', state.elapsedSeconds);
-      }, 1000);
+      }, DEFAULT_TICK_INTERVAL);
     }
     return () => clearInterval(timerRef.current);
   }, [state.isRunning]);
