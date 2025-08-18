@@ -17,7 +17,7 @@ export default function WorkoutTimer() {
   const groupInfo = getGroupInfo(state, currentPhase)
 
   function navigateToWorkoutSelector() {
-    navigate("/");
+    navigate("/workout-plan/");
   }
 
   return (

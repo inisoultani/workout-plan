@@ -10,7 +10,7 @@ export default function WorkoutSelector() {
   const todayWorkout = WorkoutPrograms.find(p => p.day === selectedDay);
 
   function navigateToWorkoutProgram() {
-    navigate(`/program/${selectedDay.toLowerCase()}`);
+    navigate(`/workout-plan/program/${selectedDay.toLowerCase()}`);
   }
 
   return (

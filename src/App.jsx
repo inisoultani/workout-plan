@@ -9,10 +9,10 @@ function App() {
     <Router>
       <Routes>
         {/* Selector screen */}
-        <Route path="/" element={<WorkoutSelector />} />
+        <Route path="/workout-plan/" element={<WorkoutSelector />} />
 
         {/* Workout screen (param is day) */}
-        <Route path="/program/:day" element={<WorkoutTimer />} />
+        <Route path="/workout-plan/program/:day" element={<WorkoutTimer />} />
       </Routes>
     </Router>
   );
