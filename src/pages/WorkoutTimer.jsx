@@ -37,7 +37,7 @@ export default function WorkoutTimer() {
           currentExercise={currentExercise} 
           totalSeconds={totalSeconds} 
           restDuration={restDuration}/>
-      <TimerController dispatch={dispatch} />
+      <TimerController dispatch={dispatch} state={state} />
       <button
         className="mt-6 px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-lg font-semibold"
         onClick={navigateToWorkoutSelector}
