@@ -1,5 +1,5 @@
 import { DEFAULT_REST_BETWEEN_PHASE } from "@/constants/workoutTimerDefaults";
-import { calculateElapsedSecondsForNext, findBackStepDurations, getCurrentExercise, getCurrentWorkoutProgram, getInitialSeconds, getPhase, isCircuit, isLinear, isSuperset, recalculateElapsedSeconds, restBetweenExerciseForPhase, restBetweenRoundsForCircuit, restBetweenSetsForLinear, restBetweenSetsForSuperset, scheduleRest } from "@/utils/workoutTimerLogic";
+import { calculateElapsedSecondsForNext, findBackStepDurations, getCurrentWorkoutProgram, getInitialSeconds, getPhase, isCircuit, isLinear, isSuperset, recalculateElapsedSeconds, restBetweenExerciseForPhase, restBetweenRoundsForCircuit, restBetweenSetsForLinear, restBetweenSetsForSuperset, scheduleRest } from "@/utils/workoutTimerLogic";
 
 export const ACTIONS = {
   START: "START",
