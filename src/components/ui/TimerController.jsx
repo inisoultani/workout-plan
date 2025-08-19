@@ -3,7 +3,20 @@ import { Button } from "./button";
 import { usePauseTimer } from "@/hooks/usePauseTimer";
 
 export default function TimerController({dispatch, state}) {
-  const { setIsPaused } = usePauseTimer(state);
+  const { setIsPaused } = usePauseTimer(
+    { isRunning: state.isRunning },
+    {
+      getDebugInfo: () => ({
+        phaseIndex: state.phaseIndex,
+        supersetIndex: state.supersetIndex,
+        exerciseIndex: state.exerciseIndex,
+        setCount: state.setCount,
+        roundCount: state.roundCount,
+        exerciseSetCount: state.exerciseSetCount,
+        isResting: state.isResting,
+      }),
+    }
+  );
 
   function dispatchStart() {
     setIsPaused(false);
