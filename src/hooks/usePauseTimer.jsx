@@ -37,7 +37,7 @@ function clearPauseTimer(pauseTimerRef, pauseCounterRef, getDebugInfo) {
     console.log("🟢 [useEffect] Pause timer cleared : ", pauseCounterRef.current, ' seconds');
     if (typeof getDebugInfo === "function") {
       try {
-        console.log("🟢 State variables:", getDebugInfo());
+        console.log("🟢 Pause timer state :", {...getDebugInfo(), pauseSeconds: pauseCounterRef.current});
       } catch (_) {
         // ignore debug errors
       }
