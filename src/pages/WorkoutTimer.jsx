@@ -1,20 +1,15 @@
 import { useWorkoutTimer } from "@/hooks/useWorkoutTImer";
-import { getCurrentExercise, getCurrentWorkoutProgram, getGroupInfo, getRestDuration, totalSecondsWithActualFlow } from "@/utils/workoutTimerLogic";
 import TimerController from "../components/ui/TimerController";
 import WorkoutProgressBar from "../components/ui/WorkoutProgressBar";
 import { useNavigate, useParams } from "react-router-dom";
+import { useWorkoutProgram } from "@/hooks/useWorkoutProgram";
 
 export default function WorkoutTimer() {
  
   const { day } = useParams();
   const navigate = useNavigate();
   const {state, dispatch} = useWorkoutTimer(day); 
-  const selectedProgram = getCurrentWorkoutProgram(day);
-  const totalSeconds = totalSecondsWithActualFlow(day, selectedProgram.phases);
-  const currentPhase = selectedProgram.phases[state.phaseIndex];
-  const restDuration = getRestDuration(state, currentPhase);
-  const currentExercise = getCurrentExercise(state, currentPhase);
-  const groupInfo = getGroupInfo(state, currentPhase)
+  const { totalSeconds, currentPhase, restDuration, currentExercise, groupInfo } = useWorkoutProgram(day, state);
 
   function navigateToWorkoutSelector() {
     navigate("/");
