@@ -1,11 +1,9 @@
-import { getExercisesLength } from "@/utils/workoutTimerLogic";
+
 import { ProgressBarWithText } from "./progress-with-text";
+import { useWorkoutProgress } from "@/hooks/useWorkoutProgress";
 
 export default function WorkoutProgressBar({state, currentPhase, currentExercise, totalSeconds, restDuration}) {
-  const exerciseProgress = ((currentExercise.duration - state.seconds) / currentExercise.duration) * 100;
-  const restProgress = ((restDuration - state.seconds) / restDuration) * 100;
-  const exerciseIndexProgress = ((state.exerciseIndex + 1) / getExercisesLength(state, currentPhase)) * 100;
-  const totalProgress = (state.elapsedSeconds / totalSeconds) * 100;
+  const { exerciseProgress, restProgress, exerciseIndexProgress, totalProgress } = useWorkoutProgress({state, currentPhase, currentExercise, totalSeconds, restDuration});
 
   // if(state.isResting) { 
   //   console.log("state.restType", state.restType);
