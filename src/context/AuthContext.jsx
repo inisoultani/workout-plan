@@ -8,6 +8,7 @@ export const AuthProvider = ({ children}) => {
     const [user, setUser] = useState(null);
 
     useEffect(() => {
+        console.log("useEffect AuthProvider called");
         supabase.auth.getSession().then(({ data: { session }}) => {
             setUser(session?.user ?? null);
         });

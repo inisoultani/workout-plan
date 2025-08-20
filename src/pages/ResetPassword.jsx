@@ -1,34 +1,12 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useTemporarySession } from "@/hooks/useTemporarySession";
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
-  const [sessionSet, setSessionSet] = useState(false);
-  const [searchParams] = useSearchParams();
+  const { sessionSet } = useTemporarySession("ResetPassword");
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Parse hash fragment from URL
-    const hash = window.location.hash.substring(1); // remove "#"
-    const params = new URLSearchParams(hash);
-
-    const access_token = params.get("access_token");
-    const refresh_token = params.get("refresh_token");
-
-    if (access_token && refresh_token) {
-      supabase.auth.setSession({
-        access_token,
-        refresh_token,
-      }).then(({ error }) => {
-        if (error) {
-          console.error("Error setting session:", error);
-        } else {
-          setSessionSet(true);
-        }
-      });
-    }
-  }, []);
 
   const handleUpdatePassword = async (e) => {
     e.preventDefault();

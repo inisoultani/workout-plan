@@ -4,14 +4,6 @@ import { useWorkoutProgress } from "@/hooks/useWorkoutProgress";
 
 export default function WorkoutProgressBar({state, currentPhase, currentExercise, totalSeconds, restDuration}) {
   const { exerciseProgress, restProgress, exerciseIndexProgress, totalProgress } = useWorkoutProgress({state, currentPhase, currentExercise, totalSeconds, restDuration});
-
-  // if(state.isResting) { 
-  //   console.log("state.restType", state.restType);
-  //   console.log("state.isResting", state.isResting);
-  //   console.log("restDuration", restDuration);
-  //   console.log("state.seconds", state.seconds);
-  //   console.log("restProgress", restProgress);
-  // }
   
   return (
     <>
