@@ -71,22 +71,19 @@ export default function Login() {
         />
         <button
           type="submit"
-          className="w-full bg-green-600 hover:bg-green-500 py-2 rounded"
-        >
+          className="w-full bg-green-600 hover:bg-green-500 py-2 rounded">
           {isSignUp ? "Sign Up" : "Login"}
         </button>
       </form>
       <button
-        className="mt-4 text-sm text-gray-400 underline"
-        onClick={() => setIsSignUp(!isSignUp)}
-      >
+        className="w-full bg-green-600 hover:bg-green-500 py-2 rounded mt-4"
+        onClick={() => setIsSignUp(!isSignUp)}>
         {isSignUp ? "Already have an account? Login" : "No account? Sign Up"}
       </button>
        {/* Reset password button */}
        <button
-        onClick={handleResetPassword}
-        className="mt-4 text-sm text-blue-400 hover:underline"
-      >
+        className="w-full bg-green-600 hover:bg-green-500 py-2 rounded mt-4"
+        onClick={handleResetPassword}>
         Forgot Password?
       </button>
     </div>
