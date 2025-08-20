@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/lib/supabaseClient";
 import { WorkoutPrograms } from "@/data/workouts"; // your dataset
+import { useAuth } from "@/context/AuthContext";
 
 export default function WorkoutSelector() {
   const [selectedDay, setSelectedDay] = useState(
@@ -8,9 +10,37 @@ export default function WorkoutSelector() {
   );
   const navigate = useNavigate();
   const todayWorkout = WorkoutPrograms.find(p => p.day === selectedDay);
+  const { setUser } = useAuth();
 
   function navigateToWorkoutProgram() {
     navigate(`/program/${selectedDay.toLowerCase()}`);
+  }
+
+  async function handleLogout() {
+    // Attempt server-side sign out (global) and clear local persisted session regardless of response
+    try {
+      await supabase.auth.signOut({ scope: "global" });
+    } catch (_) {
+      // ignore
+    }
+
+    // Manually clear any persisted Supabase auth token to avoid session restoration on refresh
+    try {
+      const url = import.meta.env.VITE_SUPABASE_URL;
+      const match = typeof url === "string" ? url.match(/^https?:\/\/([^\.]+)/) : null;
+      const projectRef = match?.[1];
+      if (projectRef) {
+        const storageKey = `sb-${projectRef}-auth-token`;
+        try { localStorage.removeItem(storageKey); } catch {}
+        try { sessionStorage.removeItem(storageKey); } catch {}
+      }
+    } catch (_) {
+      // ignore
+    }
+
+    // Clear context and navigate
+    setUser(null);
+    navigate("/login");
   }
 
   return (
@@ -18,7 +48,15 @@ export default function WorkoutSelector() {
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">🏋️ My Workout App</h1>
-        <span className="text-gray-400">Today: {selectedDay}</span>
+        <div className="flex items-center gap-3">
+          <span className="text-gray-400">Today: {selectedDay}</span>
+          <button
+            onClick={handleLogout}
+            className="text-sm text-red-400 hover:underline"
+          >
+            Logout
+          </button>
+        </div>
       </div>
 
       {/* Day Selector */}
