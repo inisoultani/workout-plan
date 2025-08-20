@@ -36,9 +36,7 @@ export default function Login() {
       return;
     }
 
-    const redirectTo =
-      import.meta.env.VITE_RESET_PASSWORD_REDIRECT_URL ||
-      `${window.location.origin}${import.meta.env.BASE_URL}reset-password`;
+    const redirectTo = import.meta.env.VITE_RESET_PASSWORD_REDIRECT_URL || `${window.location.origin}${import.meta.env.BASE_URL}reset-password`;
     console.log("redirectTo : ", redirectTo);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo, // must be whitelisted in Supabase Auth settings
