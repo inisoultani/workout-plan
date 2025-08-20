@@ -5,6 +5,7 @@ import WorkoutTimer from './pages/WorkoutTimer'
 import { AuthProvider } from "./context/AuthContext";
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
  
@@ -14,6 +15,7 @@ function App() {
         <Routes>
           {/* Login screen */}
           <Route path="/login" element={<Login />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* Selector screen */}
           <Route path="/" element={

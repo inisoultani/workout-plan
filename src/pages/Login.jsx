@@ -1,20 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { useLogin } from "@/hooks/useLogin";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
-  const { user } = useAuth();
 
-  if (user) {
-    navigate("/");
-  }
+  const { user, setUser } = useLogin();
 
   const handleSubmit = async (e) => {
+    console.log("handleSubmit called");
     e.preventDefault(); // prevent the default form submission behavior
     let result;
     if (isSignUp) {
@@ -32,7 +31,22 @@ export default function Login() {
     }
   };
 
-  console.log("login page rendered");
+  const handleResetPassword = async () => {
+    if (!email) {
+      alert("Enter your email first.");
+      return;
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: "http://localhost:5173/workout-plan/reset-password", // must be whitelisted in Supabase Auth settings
+    });
+
+    if (error) {
+        alert(error.message); // show error message
+    } else {
+        alert("Password reset email sent! Check your inbox.");
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-black text-white">
@@ -66,6 +80,13 @@ export default function Login() {
         onClick={() => setIsSignUp(!isSignUp)}
       >
         {isSignUp ? "Already have an account? Login" : "No account? Sign Up"}
+      </button>
+       {/* Reset password button */}
+       <button
+        onClick={handleResetPassword}
+        className="mt-4 text-sm text-blue-400 hover:underline"
+      >
+        Forgot Password?
       </button>
     </div>
   );
