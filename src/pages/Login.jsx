@@ -40,15 +40,15 @@ export default function Login() {
       import.meta.env.VITE_RESET_PASSWORD_REDIRECT_URL ||
       `${window.location.origin}${import.meta.env.BASE_URL}reset-password`;
     console.log("redirectTo : ", redirectTo);
-    // const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    //   redirectTo, // must be whitelisted in Supabase Auth settings
-    // });
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo, // must be whitelisted in Supabase Auth settings
+    });
 
-    // if (error) {
-    //     alert(error.message); // show error message
-    // } else {
-    //     alert("Password reset email sent! Check your inbox.");
-    // }
+    if (error) {
+        alert(error.message); // show error message
+    } else {
+        alert("Password reset email sent! Check your inbox.");
+    }
   };
 
   return (
