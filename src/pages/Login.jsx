@@ -15,18 +15,22 @@ export default function Login() {
     console.log("handleSubmit called");
     e.preventDefault(); // prevent the default form submission behavior
     let result;
-    if (isSignUp) {
-      console.log("signing up with email and password : ", email, password);
-      result = await supabase.auth.signUp({ email, password }); // sign up with email and password
-    } else {
-      console.log("signing in with email and password : ", email, password);
-      result = await supabase.auth.signInWithPassword({ email, password }); // sign in with email and password
-    }
-
-    if (result.error) {
-      alert(result.error.message); // show error message
-    } else {
-      navigate("/"); // navigate to home page
+    try {
+      if (isSignUp) {
+        console.log("signing up with email and password : ", email, password);
+        result = await supabase.auth.signUp({ email, password }); // sign up with email and password
+      } else {
+        console.log("signing in with email and password : ", email, password);
+        result = await supabase.auth.signInWithPassword({ email, password }); // sign in with email and password
+      }
+  
+      if (result.error) {
+        alert(result.error.message); // show error message
+      } else {
+        navigate("/"); // navigate to home page
+      }
+    } catch (error) {
+      console.error("Error signing in:", error);
     }
   };
 
@@ -36,16 +40,20 @@ export default function Login() {
       return;
     }
 
-    const redirectTo = import.meta.env.VITE_RESET_PASSWORD_REDIRECT_URL || `${window.location.origin}${import.meta.env.BASE_URL}reset-password`;
-    console.log("redirectTo : ", redirectTo);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo, // must be whitelisted in Supabase Auth settings
-    });
+    try {
+      const redirectTo = import.meta.env.VITE_RESET_PASSWORD_REDIRECT_URL || `${window.location.origin}${import.meta.env.BASE_URL}reset-password`;
+      console.log("redirectTo : ", redirectTo);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo, // must be whitelisted in Supabase Auth settings
+      });
 
-    if (error) {
-        alert(error.message); // show error message
-    } else {
-        alert("Password reset email sent! Check your inbox.");
+      if (error) {
+          alert(error.message); // show error message
+      } else {
+          alert("Password reset email sent! Check your inbox.");
+      }
+    } catch (error) {
+      console.error("Error resetting password:", error);
     }
   };
 
