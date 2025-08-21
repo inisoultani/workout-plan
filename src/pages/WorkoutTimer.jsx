@@ -3,6 +3,7 @@ import TimerController from "../components/ui/TimerController";
 import WorkoutProgressBar from "../components/ui/WorkoutProgressBar";
 import { useNavigate, useParams } from "react-router-dom";
 import { useWorkoutProgram } from "@/hooks/useWorkoutProgram";
+import MemoedTimerController from "../components/ui/TimerController";
 
 export default function WorkoutTimer() {
  
@@ -32,7 +33,7 @@ export default function WorkoutTimer() {
           currentExercise={currentExercise} 
           totalSeconds={totalSeconds} 
           restDuration={restDuration}/>
-      <TimerController dispatch={dispatch} state={state} />
+      <MemoedTimerController dispatch={dispatch} exerciseIndex={state.exerciseIndex} isRunning={state.isRunning} />
       <button
         className="mt-6 px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-lg font-semibold"
         onClick={navigateToWorkoutSelector}

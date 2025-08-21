@@ -1,21 +1,12 @@
 import { ACTIONS } from "@/reducers/workoutTimerReducer";
 import { Button } from "./button";
 import { usePauseTimer } from "@/hooks/usePauseTimer";
+import { memo } from "react";
 
-export default function TimerController({dispatch, state}) {
+function TimerController({dispatch, exerciseIndex, isRunning}) {
+  console.log("TimerController called with exerciseIndex : ", exerciseIndex, " and isRunning : ", isRunning);
   const { setIsPaused } = usePauseTimer(
-    { isRunning: state.isRunning },
-    {
-      getDebugInfo: () => ({
-        phaseIndex: state.phaseIndex,
-        supersetIndex: state.supersetIndex,
-        exerciseIndex: state.exerciseIndex,
-        setCount: state.setCount,
-        roundCount: state.roundCount,
-        exerciseSetCount: state.exerciseSetCount,
-        isResting: state.isResting,
-      }),
-    }
+    { isRunning: isRunning },
   );
 
   function dispatchStart() {
@@ -55,3 +46,14 @@ export default function TimerController({dispatch, state}) {
     </div>
   );
 }
+
+function areEqual(prevProps, nextProps) {
+  const prev = prevProps;
+  const next = nextProps;
+  return (
+    prev.exerciseIndex === next.exerciseIndex 
+    && prev.isRunning === next.isRunning
+  );
+}
+const MemoedTimerController = memo(TimerController, areEqual);
+export default MemoedTimerController;
