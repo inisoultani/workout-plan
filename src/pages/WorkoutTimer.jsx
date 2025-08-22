@@ -3,6 +3,7 @@ import TimerController from "../components/ui/TimerController";
 import WorkoutProgressBar from "../components/ui/WorkoutProgressBar";
 import { useNavigate, useParams } from "react-router-dom";
 import { useWorkoutProgram } from "@/hooks/useWorkoutProgram";
+import { usePauseTimer } from "@/hooks/usePauseTimer";
 
 export default function WorkoutTimer() {
  
@@ -10,6 +11,20 @@ export default function WorkoutTimer() {
   const navigate = useNavigate();
   const {state, dispatch} = useWorkoutTimer(day); 
   const { totalSeconds, currentPhase, restDuration, currentExercise, groupInfo } = useWorkoutProgram(day, state);
+  const { isPaused } = usePauseTimer(
+    { isRunning: state.isRunning, isPaused: state.isPaused },
+    {
+      getDebugInfo: () => ({
+        phaseIndex: state.phaseIndex,
+        supersetIndex: state.supersetIndex,
+        exerciseIndex: state.exerciseIndex,
+        setCount: state.setCount,
+        roundCount: state.roundCount,
+        exerciseSetCount: state.exerciseSetCount,
+        isResting: state.isResting,
+      }),
+    }
+  );
 
   function navigateToWorkoutSelector() {
     navigate("/");
@@ -32,7 +47,7 @@ export default function WorkoutTimer() {
           currentExercise={currentExercise} 
           totalSeconds={totalSeconds} 
           restDuration={restDuration}/>
-      <TimerController dispatch={dispatch} state={state} />
+      <TimerController dispatch={dispatch} />
       <button
         className="mt-6 px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-lg font-semibold"
         onClick={navigateToWorkoutSelector}

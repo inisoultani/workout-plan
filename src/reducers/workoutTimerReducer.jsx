@@ -31,7 +31,8 @@ export const INITIAL_WORKOUT_STATE = {
   restType: null,        // "betweenExercise" | "betweenSet" (we also use "betweenSet" for between-group/round)
   nextAfterRest: null,   // shape: { resume } - simplified since state changes applied immediately
   elapsedSeconds: 0,      // total time actually ticked so far
-  selectedDay: null
+  selectedDay: null,
+  isPaused: false
 };
 
 
@@ -39,10 +40,10 @@ export function workoutTimerReducer(state, action) {
   // const phase = getPhase(WORKOUT_PHASES, state.phaseIndex);
   switch(action.type) {
     case ACTIONS.START:
-      return { ...state, isRunning: true };
+      return { ...state, isRunning: true, isPaused: false };
 
     case ACTIONS.PAUSE:
-      return { ...state, isRunning: false };
+      return { ...state, isRunning: false, isPaused: true };
 
     case ACTIONS.NEXT: {
       return reduceNext(state, getCurrentWorkoutProgram(state.selectedDay).phases);

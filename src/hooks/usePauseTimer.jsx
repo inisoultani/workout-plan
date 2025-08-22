@@ -2,11 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { DEFAULT_TICK_INTERVAL } from "@/constants/workoutTimerDefaults";
 
 // API: usePauseTimer({ isRunning }, { getDebugInfo, onTick })
-export function usePauseTimer({ isRunning }, options = {}) {
+export function usePauseTimer({ isRunning, isPaused }, options = {}) {
   const { getDebugInfo, onTick } = options;
   const pauseTimerRef = useRef(null);
   const pauseCounterRef = useRef(0);
-  const [isPaused, setIsPaused] = useState(false);
 
   // Handle pause timer when state changes
   useEffect(() => {
@@ -29,7 +28,7 @@ export function usePauseTimer({ isRunning }, options = {}) {
     }
   }, [isRunning, isPaused]);
 
-  return { isPaused, setIsPaused };
+  return { isPaused };
 }
 
 function clearPauseTimer(pauseTimerRef, pauseCounterRef, getDebugInfo) {
