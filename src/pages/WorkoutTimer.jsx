@@ -1,16 +1,17 @@
-import { useWorkoutTimer } from "@/hooks/useWorkoutTImer";
+import { useWorkoutTimer } from "@/hooks/useWorkoutTimer";
 import TimerController from "../components/ui/TimerController";
 import WorkoutProgressBar from "../components/ui/WorkoutProgressBar";
 import { useNavigate, useParams } from "react-router-dom";
 import { useWorkoutProgram } from "@/hooks/useWorkoutProgram";
 import { usePauseTimer } from "@/hooks/usePauseTimer";
+import { ACTIONS } from "@/reducers/workoutTimerReducer";
 
 export default function WorkoutTimer() {
  
   const { day } = useParams();
   const navigate = useNavigate();
-  const {state, dispatch} = useWorkoutTimer(day); 
-  const { totalSeconds, currentPhase, restDuration, currentExercise, groupInfo } = useWorkoutProgram(day, state);
+  const { state, dispatch } = useWorkoutTimer(); 
+  const { totalSeconds, currentPhase, restDuration, currentExercise, groupInfo } = useWorkoutProgram(state);
   usePauseTimer(
     { isRunning: state.isRunning, isPaused: state.isPaused },
     {
@@ -27,6 +28,7 @@ export default function WorkoutTimer() {
   );
 
   function navigateToWorkoutSelector() {
+    dispatch({ type: ACTIONS.RESTART });
     navigate("/");
   }
 
@@ -47,7 +49,7 @@ export default function WorkoutTimer() {
           currentExercise={currentExercise} 
           totalSeconds={totalSeconds} 
           restDuration={restDuration}/>
-      <TimerController dispatch={dispatch} />
+      <TimerController />
       <button
         className="mt-6 px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-lg font-semibold"
         onClick={navigateToWorkoutSelector}

@@ -1,8 +1,10 @@
 import { ACTIONS } from "@/reducers/workoutTimerReducer";
 import { Button } from "./button";
 import { memo } from "react";
+import { useWorkoutDispatch } from "@/context/WorkoutContext";
 
-function TimerController({dispatch}) {
+function TimerController() {
+  const dispatch = useWorkoutDispatch();
 
   console.log("TimerController rendered");
 

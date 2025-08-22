@@ -6,6 +6,7 @@ import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ResetPassword from "./pages/ResetPassword";
 import { AuthProvider } from "./components/AuthProvider";
+import { WorkoutStateProvider } from "./components/WorkoutStateProvider";
 
 function App() {
  
@@ -20,7 +21,9 @@ function App() {
           {/* Selector screen */}
           <Route path="/" element={
               <ProtectedRoute>
-                <WorkoutSelector />
+                <WorkoutStateProvider>
+                  <WorkoutSelector />
+                </WorkoutStateProvider>
               </ProtectedRoute>
             } 
           />
@@ -28,7 +31,9 @@ function App() {
           {/* Workout screen (param is day) */}
           <Route path="/program/:day" element={
               <ProtectedRoute>
-                <WorkoutTimer />
+                <WorkoutStateProvider>
+                  <WorkoutTimer />
+                </WorkoutStateProvider>
               </ProtectedRoute>
             }
           />

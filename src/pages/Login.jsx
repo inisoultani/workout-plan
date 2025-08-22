@@ -24,6 +24,7 @@ export default function Login() {
       }
   
       if (result.error) {
+        console.log("result.error : ", result.error);
         alert(result.error.message); // show error message
       } else {
         navigate("/"); // navigate to home page

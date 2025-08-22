@@ -1,16 +1,14 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
-import { WorkoutPrograms } from "@/data/workouts"; // your dataset
+import { WorkoutPrograms } from "@/data/sources";
+import { useWorkoutProgramSelector } from "@/hooks/useWorkoutProgramSelector";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
 export default function WorkoutSelector() {
-  const [selectedDay, setSelectedDay] = useState(
-    new Date().toLocaleDateString("en-US", { weekday: "long" })
-  );
-  const navigate = useNavigate();
-  const todayWorkout = WorkoutPrograms.find(p => p.day === selectedDay);
+
+  const { selectedDay, state, setSelectedDay, days } = useWorkoutProgramSelector(new Date().toLocaleDateString("en-US", { weekday: "long" }));
   const { setUser } = useAuth();
+  const navigate = useNavigate();
 
   function navigateToWorkoutProgram() {
     navigate(`/program/${selectedDay.toLowerCase()}`);
@@ -64,25 +62,25 @@ export default function WorkoutSelector() {
 
       {/* Day Selector */}
       <div className="flex space-x-2 overflow-x-auto pb-4 mb-6">
-        {WorkoutPrograms.map(p => (
+        {days.map(record => (
           <button
-            key={p.day}
-            onClick={() => setSelectedDay(p.day)}
+            key={record.day}
+            onClick={() => setSelectedDay(record.day)}
             className={`px-4 py-2 rounded-full transition ${
-              selectedDay === p.day
+              selectedDay === record.day
                 ? "bg-green-600 text-white"
                 : "bg-gray-700 text-gray-300 hover:bg-gray-600"
             }`}
           >
-            {p.day}
+            {record.day}
           </button>
         ))}
       </div>
 
       {/* Workout Preview */}
       <div className="flex-1 space-y-3">
-        {todayWorkout ? (
-          todayWorkout.phases.map((phase, i) => (
+        {state.program ? (
+          state.program.phases.map((phase, i) => (
             <div
               key={i}
               className="bg-gray-800 p-4 rounded-xl shadow-md flex justify-between items-center"
@@ -107,7 +105,7 @@ export default function WorkoutSelector() {
       </div>
 
       {/* Start Workout */}
-      {todayWorkout && (
+      {state.program && (
         <button onClick={navigateToWorkoutProgram} className="mt-6 bg-green-600 hover:bg-green-500 text-lg font-bold py-3 rounded-xl shadow-lg">
           ▶ Start Workout
         </button>

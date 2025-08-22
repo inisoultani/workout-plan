@@ -1,12 +1,40 @@
-# React + Vite
+## Supabase migration/reset workflow
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Follow these steps to (re)create the database and seed an initial user without losing control over auth:
 
-Currently, two official plugins are available:
+1) Install CLI and login
+```
+brew install supabase
+supabase --version
+supabase login
+```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+2) Link to the project
+```
+supabase link --project-ref [yourProjectRef]
+```
 
-## Expanding the ESLint configuration
+3) Reset database schema only (skip seed on reset)
+```
+supabase db reset --linked --no-seed
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+4) Export env vars for Admin API (service role)
+```
+export SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+export SUPABASE_URL=your_project_url
+```
+
+5) Create or recreate the initial user (idempotent)
+```
+node scripts/supabaseCreateUser.mjs
+```
+You can update the target email/password inside `scripts/supabaseCreateUser.mjs`.
+
+6) Update seed to point to the user and run it
+- In `supabase/seed.sql`, set the desired `user_id` explicitly or adjust to select by email if preferred.
+- Execute the SQL in the Supabase SQL Editor (or `psql`) to load programs, phases, and exercises linked to that user.
+
+Notes:
+- Using `--no-seed` prevents automatic seeds on reset; you control when to insert data.
+- Keep the service role key out of the frontend; only use it for server-side scripts.

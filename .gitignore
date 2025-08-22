@@ -68,3 +68,5 @@ coverage/
 *.bak
 *.tmp
 
+
+supabase/.temp/
