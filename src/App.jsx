@@ -2,10 +2,10 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import './App.css'
 import WorkoutSelector from './pages/WorkoutSelector';
 import WorkoutTimer from './pages/WorkoutTimer'
-import { AuthProvider } from "./context/AuthContext";
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ResetPassword from "./pages/ResetPassword";
+import { AuthProvider } from "./components/AuthProvider";
 
 function App() {
  
