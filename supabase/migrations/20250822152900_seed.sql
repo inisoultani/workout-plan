@@ -542,3 +542,57 @@ END
 $$;
 
 -- Copy phases & exercises same as Sunday
+
+-- ===================================================
+-- SAMPLE WORKOUT LOG: Sunday 2025-08-17
+-- ===================================================
+DO $$
+DECLARE
+  user_id uuid := '00000000-0000-0000-0000-000000000000'; -- set to your desired user id
+  w_id uuid := gen_random_uuid();
+  sunday_program_id uuid := (
+    select id from public.programs where day = 'Sunday' limit 1
+  );
+BEGIN
+  -- Workout session header
+  insert into public.workouts (id, user_id, program_id, date, user_notes, coach_feedback)
+  values (
+    w_id,
+    user_id,
+    sunday_program_id,
+    date '2025-08-17',
+    'Hydration: 2-3 sips of water each set. Optional phase: 20x TRX row. No other findings during workout.',
+    'Strong adherence to supersets (A/B: 4 sets, C: 3 sets). Optional TRX rows added useful upper-back volume; keep shoulders depressed and ribs stacked. Next time, progress by +1 rep on C2 or add ~2.5–5% load if RPE < 8. Maintain 60–90s rest; continue 2–3 sips water/set. No adverse signs—green light to advance.'
+  );
+
+  -- Block A (A1 ↔ A2) – 4 sets
+  insert into public.workout_exercises (id, workout_id, user_id, exercise_id, exercise_name, sets, reps, weight, notes) values
+    (gen_random_uuid(), w_id, user_id, null, 'A1', 4, null, null, 'Performed in superset with A2'),
+    (gen_random_uuid(), w_id, user_id, null, 'A2', 4, null, null, 'Performed in superset with A1');
+
+  -- Block B (B1 ↔ B2) – 4 sets
+  insert into public.workout_exercises (id, workout_id, user_id, exercise_id, exercise_name, sets, reps, weight, notes) values
+    (gen_random_uuid(), w_id, user_id, null, 'B1', 4, null, null, 'Performed in superset with B2'),
+    (gen_random_uuid(), w_id, user_id, null, 'B2', 4, null, null, 'Performed in superset with B1');
+
+  -- Block C (C1 ↔ C2) – 3 sets
+  insert into public.workout_exercises (id, workout_id, user_id, exercise_id, exercise_name, sets, reps, weight, notes) values
+    (gen_random_uuid(), w_id, user_id, null, 'C1', 3, null, null, 'Performed in superset with C2'),
+    (gen_random_uuid(), w_id, user_id, null, 'C2', 3, null, null, 'Performed in superset with C1');
+
+  -- Optional phase: TRX Row – 20 reps total
+  insert into public.workout_exercises (id, workout_id, user_id, exercise_id, exercise_name, sets, reps, weight, notes)
+  values (gen_random_uuid(), w_id, user_id, null, 'TRX Row (optional)', 1, 20, null, 'Completed as optional volume');
+
+  -- Free-form user note (hydration + status)
+  insert into public.notes (user_id, workout_id, content)
+  values (user_id, w_id, 'Hydration: 2-3 sips of water each set. So far no other findings regarding my condition.');
+
+  -- AI Coach feedback (long form)
+  insert into public.feedback (user_id, workout_id, feedback)
+  values (
+    user_id,
+    w_id,
+    'Great consistency across supersets. A/B at 4 sets and C at 3 sets show solid volume without overreaching. Optional TRX rows added helpful upper-back work—focus on scapular retraction and neutral neck. If sets ended ≤ RPE7, add a small load or +1 rep next session, prioritizing C2. Keep rests ~60–90s and continue sipping water 2–3x each set. No negative symptoms reported—continue progression.'
+  );
+END $$;
