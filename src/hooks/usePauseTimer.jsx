@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { DEFAULT_TICK_INTERVAL } from "@/constants/workoutTimerDefaults";
 
 // API: usePauseTimer({ isRunning }, { getDebugInfo, onTick })
@@ -37,7 +37,8 @@ function clearPauseTimer(pauseTimerRef, pauseCounterRef, getDebugInfo) {
     if (typeof getDebugInfo === "function") {
       try {
         console.log("🟢 Pause timer state :", {...getDebugInfo(), pauseSeconds: pauseCounterRef.current});
-      } catch (_) {
+      } catch (error) {
+        console.log("🟢 Error in getDebugInfo :", error);
         // ignore debug errors
       }
     }

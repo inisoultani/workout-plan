@@ -11,7 +11,7 @@ export default function WorkoutTimer() {
   const navigate = useNavigate();
   const {state, dispatch} = useWorkoutTimer(day); 
   const { totalSeconds, currentPhase, restDuration, currentExercise, groupInfo } = useWorkoutProgram(day, state);
-  const { isPaused } = usePauseTimer(
+  usePauseTimer(
     { isRunning: state.isRunning, isPaused: state.isPaused },
     {
       getDebugInfo: () => ({

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 export function useLogin() {
     const navigate = useNavigate();
-    const { user, setUser } = useAuth();
+    const { user } = useAuth();
 
     useEffect(() => {
         if (user) {
@@ -16,5 +16,5 @@ export function useLogin() {
         }
     }, [user]);
 
-    return { user, setUser };
+    return {  };
 }

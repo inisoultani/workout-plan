@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
 import { useLogin } from "@/hooks/useLogin";
 
 export default function Login() {
@@ -9,7 +8,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
-  const { user, setUser } = useLogin();
+  useLogin();
 
   const handleSubmit = async (e) => {
     console.log("handleSubmit called");

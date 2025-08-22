@@ -20,21 +20,24 @@ export default function WorkoutSelector() {
     // Attempt server-side sign out (global) and clear local persisted session regardless of response
     try {
       await supabase.auth.signOut({ scope: "global" });
-    } catch (_) {
+    } catch (error) {
+      console.log("🟢 Error in handleLogout :", error);
       // ignore
     }
 
     // Manually clear any persisted Supabase auth token to avoid session restoration on refresh
     try {
       const url = import.meta.env.VITE_SUPABASE_URL;
-      const match = typeof url === "string" ? url.match(/^https?:\/\/([^\.]+)/) : null;
+      const match = typeof url === "string" ? url.match(/^https?:\/\/([^.]+)/) : null;
       const projectRef = match?.[1];
       if (projectRef) {
         const storageKey = `sb-${projectRef}-auth-token`;
-        try { localStorage.removeItem(storageKey); } catch {}
-        try { sessionStorage.removeItem(storageKey); } catch {}
+        localStorage.removeItem(storageKey); 
+        sessionStorage.removeItem(storageKey);
+        
       }
-    } catch (_) {
+    } catch (error) {
+      console.log("🟢 Error in handleLogout :", error);
       // ignore
     }
 
