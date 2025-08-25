@@ -1,21 +1,11 @@
-DO $$
-BEGIN
-  -- Ensure seed auth user exists
-  INSERT INTO "auth"."users" ("id", "email", "encrypted_password", "email_confirmed_at", "raw_app_meta_data", "raw_user_meta_data")
-  VALUES (
-    '8237e950-e108-4a81-84b7-210c3c178d7c',
-    'workoutplanapp@bltiwd.com',
-    '$2a$10$wjmV3WvssYjF8123NZOKSehNh8BWbSpE7dBGEVdweMgQxLHp4IBCi',
-    now(),
-    '{"provider": "email", "providers": ["email"]}'::jsonb,
-    '{"sub": "8237e950-e108-4a81-84b7-210c3c178d7c", "email": "workoutplanapp@bltiwd.com", "email_verified": true, "phone_verified": false}'::jsonb
-  )
-  ON CONFLICT (id) DO NOTHING;
-END $$;
 
 DO $$
 DECLARE
-  user_id uuid := '8237e950-e108-4a81-84b7-210c3c178d7c'::uuid;
+  user_id uuid := 'cf83fc57-524e-4467-8dda-696bc5c3182f'::uuid;
+  w_id uuid := gen_random_uuid();
+  sunday_program_id uuid := (
+    select id from public.programs where day = 'Sunday' limit 1
+  );
 BEGIN
 -- =====================================================================
 -- MONDAY: Strength & Stability
@@ -554,20 +544,8 @@ insert into public.exercises (id, user_id, phase_id, exercise_name, duration)
 values (gen_random_uuid(), user_id,
   (select id from public.phases where program_id in (select id from public.programs where day='Wednesday') and label='Cooldown'),
   'Leher & bahu gerak ringan', 60);
-END
-$$;
 
--- ===================================================
--- SAMPLE WORKOUT LOG: Sunday 2025-08-17
--- ===================================================
-DO $$
-DECLARE
-  user_id uuid := '8237e950-e108-4a81-84b7-210c3c178d7c'::uuid;
-  w_id uuid := gen_random_uuid();
-  sunday_program_id uuid := (
-    select id from public.programs where day = 'Sunday' limit 1
-  );
-BEGIN
+
   -- Workout session header
   insert into public.workouts (id, user_id, program_id, date, user_notes, coach_feedback)
   values (
