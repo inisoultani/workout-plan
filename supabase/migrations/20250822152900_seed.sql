@@ -1,6 +1,6 @@
 DO $$
 DECLARE
-  user_id uuid := '00000000-0000-0000-0000-000000000000'; -- set to your desired user id
+  user_id uuid := :'user_id'::uuid;
 BEGIN
 -- =====================================================================
 -- MONDAY: Strength & Stability
@@ -548,7 +548,7 @@ $$;
 -- ===================================================
 DO $$
 DECLARE
-  user_id uuid := '00000000-0000-0000-0000-000000000000'; -- set to your desired user id
+  user_id uuid := :'user_id'::uuid;
   w_id uuid := gen_random_uuid();
   sunday_program_id uuid := (
     select id from public.programs where day = 'Sunday' limit 1

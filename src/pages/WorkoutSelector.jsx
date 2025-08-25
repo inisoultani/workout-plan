@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
-import { WorkoutPrograms } from "@/data/workouts"; // your dataset
 import { useAuth } from "@/context/AuthContext";
+import { getCurrentWorkoutProgram } from "@/utils/workoutTimerLogic";
+import { WorkoutPrograms } from "@/data/sources";
 
 export default function WorkoutSelector() {
   const [selectedDay, setSelectedDay] = useState(
     new Date().toLocaleDateString("en-US", { weekday: "long" })
   );
   const navigate = useNavigate();
-  const todayWorkout = WorkoutPrograms.find(p => p.day === selectedDay);
+  const todayWorkout = getCurrentWorkoutProgram(selectedDay);
   const { setUser } = useAuth();
 
   function navigateToWorkoutProgram() {

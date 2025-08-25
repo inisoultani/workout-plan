@@ -1,5 +1,5 @@
 import { DEFAULT_REST_BETWEEN_EXERCISE, DEFAULT_REST_BETWEEN_EXERCISE_IN_SET, DEFAULT_REST_BETWEEN_ROUNDS, DEFAULT_REST_BETWEEN_SET, DEFAULT_REST_BETWEEN_PHASE } from "@/constants/workoutTimerDefaults";
-import { WorkoutPrograms } from "@/data/workouts";
+import { WorkoutPrograms } from "@/data/sources";
 
 
 // ===== Type guards =====
