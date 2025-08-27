@@ -15,7 +15,8 @@ export const ACTIONS = {
   NEXT: "NEXT",
   RESET: "RESET_CURRENT_EXCERCISE",
   RESTART: "RESTART",
-  GO_TO_PREVIOUS: "GO_TO_PREVIOUS"
+  GO_TO_PREVIOUS: "GO_TO_PREVIOUS",
+  SET_PROGRAM: "SET_PROGRAM"
 };
 
 export const INITIAL_WORKOUT_STATE = {
@@ -32,7 +33,8 @@ export const INITIAL_WORKOUT_STATE = {
   nextAfterRest: null,   // shape: { resume } - simplified since state changes applied immediately
   elapsedSeconds: 0,      // total time actually ticked so far
   selectedDay: null,
-  isPaused: false
+  isPaused: false,
+  program: null
 };
 
 
@@ -46,7 +48,7 @@ export function workoutTimerReducer(state, action) {
       return { ...state, isRunning: false, isPaused: true };
 
     case ACTIONS.NEXT: {
-      return reduceNext(state, getCurrentWorkoutProgram(state.selectedDay).phases);
+      return reduceNext(state, state.program.phases);
     }
 
     case ACTIONS.GO_TO_PREVIOUS:{
@@ -56,7 +58,7 @@ export function workoutTimerReducer(state, action) {
         exercise: state.exerciseIndex,
         isResting: state.isResting
       });
-      const prevResult = reduceGoToPrevious(state, getCurrentWorkoutProgram(state.selectedDay).phases);
+      const prevResult = reduceGoToPrevious(state, state.program.phases);
       console.log("🔴 PREV - After:", { 
         elapsedSeconds: prevResult.elapsedSeconds, 
         calculatedBy: "recalculateElapsedSeconds function",
@@ -96,6 +98,10 @@ export function workoutTimerReducer(state, action) {
         selectedDay: state.selectedDay,
         seconds: getInitialSeconds(getCurrentWorkoutProgram(state.selectedDay).phases[0], 0, 0, 0) 
       };
+    }
+
+    case ACTIONS.SET_PROGRAM: {
+      return { ...state, program: action.payload };
     }
 
     default:

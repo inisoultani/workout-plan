@@ -1,16 +1,29 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/context/AuthContext";
-import { getCurrentWorkoutProgram } from "@/utils/workoutTimerLogic";
 import { WorkoutPrograms } from "@/data/sources";
+import { loadWorkoutProgramsFromDb } from "@/data/loadProgramsFromDb";
+import { useWorkoutDispatch, useWorkoutState } from "@/context/WorkoutContext";
+import { ACTIONS } from "@/reducers/workoutTimerReducer";
 
 export default function WorkoutSelector() {
-  const [selectedDay, setSelectedDay] = useState(
-    new Date().toLocaleDateString("en-US", { weekday: "long" })
-  );
+  const [selectedDay, setSelectedDay] = useState(new Date().toLocaleDateString("en-US", { weekday: "long" }));
+  const state = useWorkoutState();
+  const dispatch = useWorkoutDispatch();
+  
+  useEffect(() => {
+    console.log("🟢 selectedDay :", selectedDay);
+    const fetchPrograms = async () => {
+      const programs = await loadWorkoutProgramsFromDb(selectedDay);
+      console.log("🟢 programs :", programs);
+      dispatch({ type: ACTIONS.SET_PROGRAM, payload: programs[0] });
+    };
+    fetchPrograms();
+  }, [selectedDay, dispatch]);
+
   const navigate = useNavigate();
-  const todayWorkout = getCurrentWorkoutProgram(selectedDay);
+  // const todayWorkout = getCurrentWorkoutProgram(selectedDay);
   const { setUser } = useAuth();
 
   function navigateToWorkoutProgram() {
@@ -82,8 +95,8 @@ export default function WorkoutSelector() {
 
       {/* Workout Preview */}
       <div className="flex-1 space-y-3">
-        {todayWorkout ? (
-          todayWorkout.phases.map((phase, i) => (
+        {state.program ? (
+          state.program.phases.map((phase, i) => (
             <div
               key={i}
               className="bg-gray-800 p-4 rounded-xl shadow-md flex justify-between items-center"
@@ -108,7 +121,7 @@ export default function WorkoutSelector() {
       </div>
 
       {/* Start Workout */}
-      {todayWorkout && (
+      {state.program && (
         <button onClick={navigateToWorkoutProgram} className="mt-6 bg-green-600 hover:bg-green-500 text-lg font-bold py-3 rounded-xl shadow-lg">
           ▶ Start Workout
         </button>

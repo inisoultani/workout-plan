@@ -1,4 +1,4 @@
-const modules = import.meta.glob('./*.jsx', { eager: true, import: 'WorkoutPrograms' });
+const modules = import.meta.glob('./*workouts.jsx', { eager: true, import: 'WorkoutPrograms' });
 
 const sourceName = import.meta.env.VITE_DATA_SOURCE || 'workouts';
 const fileName = sourceName.endsWith('.jsx') ? sourceName : `${sourceName}.jsx`;

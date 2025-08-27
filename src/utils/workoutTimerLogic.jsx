@@ -477,17 +477,17 @@ export function findBackStepDurations(state, currentPhase, phases) {
 }
 
 /** Calculates elapsed time when advancing forward in the timer  */
-export function findForwardStepDurations(state, currentPhase, phases) {
-  if (state.isResting) {
-    // In REST: Add remaining rest + full duration of next exercise
-    const nextResult = reduceNext(state, phases);
-    const nextExercise = getCurrentExercise(nextResult, phases[nextResult.phaseIndex]);
-    return { 
-      nextExerciseDuration: nextExercise?.duration ?? 0,
-      nextExerciseName: nextExercise?.name ?? ""
-    };
-  } else {
-    // In EXERCISE: Add only remaining exercise time (no rest, no next exercise)
-    return {};
-  }
-}
+// export function findForwardStepDurations(state, currentPhase, phases) {
+//   if   (state.isResting) {
+//     // In REST: Add remaining rest + full duration of next exercise
+//     const nextResult = reduceNext(state, phases);
+//     const nextExercise = getCurrentExercise(nextResult, phases[nextResult.phaseIndex]);
+//     return { 
+//       nextExerciseDuration: nextExercise?.duration ?? 0,
+//       nextExerciseName: nextExercise?.name ?? ""
+//     };
+//   } else {
+//     // In EXERCISE: Add only remaining exercise time (no rest, no next exercise)
+//     return {};
+//   }
+// }
