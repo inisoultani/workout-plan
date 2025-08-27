@@ -1,5 +1,20 @@
 import { supabase } from '@/lib/supabaseClient';
 
+export async function loadDaysFromDb() {
+  console.log("🟢 loadDaysFromDb");
+
+  let q = supabase
+    .from('programs')
+    .select(`
+      day
+    `)
+    .order('day', { ascending: true });
+
+  const { data, error } = await q;
+  if (error) throw error;
+  return (data || []);
+}
+
 export async function loadWorkoutProgramsFromDb(day) {
   console.log("🟢 loadWorkoutProgramsFromDb day :", day);
 

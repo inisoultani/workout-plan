@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 
 export default function WorkoutSelector() {
 
-  const { selectedDay, state, setSelectedDay } = useWorkoutProgramSelector(new Date().toLocaleDateString("en-US", { weekday: "long" }));
+  const { selectedDay, state, setSelectedDay, days } = useWorkoutProgramSelector(new Date().toLocaleDateString("en-US", { weekday: "long" }));
   const { setUser } = useAuth();
   const navigate = useNavigate();
 
@@ -62,17 +62,17 @@ export default function WorkoutSelector() {
 
       {/* Day Selector */}
       <div className="flex space-x-2 overflow-x-auto pb-4 mb-6">
-        {WorkoutPrograms.map(p => (
+        {days.map(record => (
           <button
-            key={p.day}
-            onClick={() => setSelectedDay(p.day)}
+            key={record.day}
+            onClick={() => setSelectedDay(record.day)}
             className={`px-4 py-2 rounded-full transition ${
-              selectedDay === p.day
+              selectedDay === record.day
                 ? "bg-green-600 text-white"
                 : "bg-gray-700 text-gray-300 hover:bg-gray-600"
             }`}
           >
-            {p.day}
+            {record.day}
           </button>
         ))}
       </div>
