@@ -1,6 +1,4 @@
 import { DEFAULT_REST_BETWEEN_EXERCISE, DEFAULT_REST_BETWEEN_EXERCISE_IN_SET, DEFAULT_REST_BETWEEN_ROUNDS, DEFAULT_REST_BETWEEN_SET, DEFAULT_REST_BETWEEN_PHASE } from "@/constants/workoutTimerDefaults";
-import { WorkoutPrograms } from "@/data/sources";
-
 
 // ===== Type guards =====
 /** Checks if a phase is of linear type */
@@ -45,7 +43,7 @@ export function getRestDuration(state, currentPhase) {
   
   // Handle rest between phases
   if (state.restType === "betweenPhase") {
-    const currentWorkout = getCurrentWorkoutProgram(state.selectedDay);
+    const currentWorkout = state.program;
     return currentWorkout?.restBetweenPhase ?? DEFAULT_REST_BETWEEN_PHASE;
   }
   
@@ -85,11 +83,10 @@ export function getInitialSeconds(currentPhase, phaseIdx, supersetIndex, exercis
 }
 
 /** Calculates the total workout duration including all exercises and rest periods */
-export function totalSecondsWithActualFlow(selectedDay, workoutPhases) {
-  const currentWorkout = getCurrentWorkoutProgram(selectedDay);
-  const restBetweenPhase = currentWorkout?.restBetweenPhase ?? DEFAULT_REST_BETWEEN_PHASE;
+export function totalSecondsWithActualFlow(selectedProgram) {
+  const restBetweenPhase = selectedProgram?.restBetweenPhase ?? DEFAULT_REST_BETWEEN_PHASE;
   
-  return workoutPhases.reduce((total, phase, phaseIndex) => {
+  return selectedProgram.phases.reduce((total, phase, phaseIndex) => {
     // Superset phase
     if (isSuperset(phase)) {
       phase.groups.forEach((superset, sIndex) => {
@@ -161,7 +158,7 @@ export function totalSecondsWithActualFlow(selectedDay, workoutPhases) {
     }
     
     // Add rest between phases (except after the last phase)
-    if (phaseIndex < workoutPhases.length - 1) {
+    if (phaseIndex < selectedProgram.phases.length - 1) {
       total += restBetweenPhase;
     }
     
@@ -200,12 +197,6 @@ export function recalculateElapsedSeconds(currentSeconds, elapsedSeconds, isInRe
   });
   
   return newElapsed;
-}
-
-/** Gets the current workout program (hardcoded to Sunday) */
-export function getCurrentWorkoutProgram(day = "Sunday") {
-  // Since we're using hardcoded WORKOUT_PHASES from Sunday, find Sunday workout
-  return WorkoutPrograms.find(program => program.day.toLowerCase() === day.toLowerCase());
 }
 
 /** Gets display information for the current group/set/round based on phase type */
@@ -436,7 +427,7 @@ export function findBackStepDurations(state, currentPhase, phases) {
   // ---- Fallback to previous PHASE ----
   if (phaseIndex > 0) {
     const prevPhase = phases[phaseIndex - 1];
-    const currentWorkout = getCurrentWorkoutProgram(state.selectedDay);
+    const currentWorkout = state.program;
     const restBetweenPhase = currentWorkout?.restBetweenPhase ?? DEFAULT_REST_BETWEEN_PHASE;
     const currentFirstDuration = getCurrentExerciseDuration(
       { ...state, exerciseIndex: 0, supersetIndex: 0 }, // first exercise in current phase

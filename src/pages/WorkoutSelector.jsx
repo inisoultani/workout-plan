@@ -1,30 +1,14 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
-import { useAuth } from "@/context/AuthContext";
 import { WorkoutPrograms } from "@/data/sources";
-import { loadWorkoutProgramsFromDb } from "@/data/loadProgramsFromDb";
-import { useWorkoutDispatch, useWorkoutState } from "@/context/WorkoutContext";
-import { ACTIONS } from "@/reducers/workoutTimerReducer";
+import { useWorkoutProgramSelector } from "@/hooks/useWorkoutProgramSelector";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
 export default function WorkoutSelector() {
-  const [selectedDay, setSelectedDay] = useState(new Date().toLocaleDateString("en-US", { weekday: "long" }));
-  const state = useWorkoutState();
-  const dispatch = useWorkoutDispatch();
-  
-  useEffect(() => {
-    console.log("🟢 selectedDay :", selectedDay);
-    const fetchPrograms = async () => {
-      const programs = await loadWorkoutProgramsFromDb(selectedDay);
-      console.log("🟢 programs :", programs);
-      dispatch({ type: ACTIONS.SET_PROGRAM, payload: programs[0] });
-    };
-    fetchPrograms();
-  }, [selectedDay, dispatch]);
 
-  const navigate = useNavigate();
-  // const todayWorkout = getCurrentWorkoutProgram(selectedDay);
+  const { selectedDay, state, setSelectedDay } = useWorkoutProgramSelector(new Date().toLocaleDateString("en-US", { weekday: "long" }));
   const { setUser } = useAuth();
+  const navigate = useNavigate();
 
   function navigateToWorkoutProgram() {
     navigate(`/program/${selectedDay.toLowerCase()}`);

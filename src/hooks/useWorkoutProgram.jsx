@@ -1,9 +1,8 @@
-import { getCurrentExercise, getCurrentWorkoutProgram, getGroupInfo, getRestDuration, totalSecondsWithActualFlow } from "@/utils/workoutTimerLogic";
-import { useMemo } from "react";
+import { getCurrentExercise, getGroupInfo, getRestDuration, totalSecondsWithActualFlow } from "@/utils/workoutTimerLogic";
 
-export function useWorkoutProgram(day, state) {
-  const selectedProgram = useMemo(() => getCurrentWorkoutProgram(day), [day]);
-  const totalSeconds = useMemo(() => totalSecondsWithActualFlow(day, selectedProgram.phases), [day, selectedProgram]);
+export function useWorkoutProgram(state) {
+  const selectedProgram = state.program;
+  const totalSeconds = totalSecondsWithActualFlow(selectedProgram);
 
   const currentPhase = selectedProgram.phases[state.phaseIndex]; 
   const restDuration = getRestDuration(state, currentPhase);
