@@ -32,7 +32,12 @@ export async function loadWorkoutProgramsFromDb(day) {
       )
     `)
     .eq('day', day)
-    .order('day', { ascending: true });
+    .order('day', { ascending: true })
+    // Ensure deterministic ordering for nested relations
+    .order('position', { ascending: true, foreignTable: 'phases' })
+    .order('position', { ascending: true, foreignTable: 'phases.exercise_groups' })
+    .order('position', { ascending: true, foreignTable: 'phases.exercise_groups.exercises' })
+    .order('position', { ascending: true, foreignTable: 'phases.exercises' });
 
   // if (day && day !== 'All') q = q.eq('day', day[0].toUpperCase() + day.slice(1).toLowerCase());
   // if (uid) q = q.or(`is_template.eq.true,user_id.eq.${uid}`); else q = q.eq('is_template', true);

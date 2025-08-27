@@ -1,7 +1,7 @@
 
 DO $$
 DECLARE
-  user_id uuid := 'cf83fc57-524e-4467-8dda-696bc5c3182f'::uuid;
+  user_id uuid := '8a9e2187-5103-465e-ac33-f74fc2a4b4e7'::uuid;
   w_id uuid := gen_random_uuid();
   sunday_program_id uuid := (
     select id from public.programs where day = 'Sunday' limit 1
@@ -29,42 +29,46 @@ values (gen_random_uuid(), user_id,
   'Dynamic stretching', 180);
 
 -- Main Strength Phase
-insert into public.phases (id, user_id, program_id, label, type, rest_between_exercise)
-values (gen_random_uuid(), user_id, (select id from public.programs where day='Monday'), 'Main Strength', 'linear', 60);
+insert into public.phases (id, user_id, program_id, label, type, rest_between_exercise, rest_between_sets)
+values (gen_random_uuid(), user_id, (select id from public.programs where day='Monday'), 'Strength Training', 'linear', 30, 60);
 
-insert into public.exercises (id, user_id, phase_id, exercise_name, notes)
+insert into public.exercises (id, user_id, phase_id, exercise_name, duration, notes)
 values (gen_random_uuid(), user_id,
-  (select id from public.phases where program_id in (select id from public.programs where day='Monday') and label='Main Strength'),
-  'Goblet Zercher Squat – 3×8–10 @ 16–20kg DB', null);
+  (select id from public.phases where program_id in (select id from public.programs where day='Monday') and label='Strength Training'),
+  'Goblet Zercher Squat (16-20kg DB)', 80, '8-10 reps, control eccentric (3s down)');
 
-insert into public.exercises (id, user_id, phase_id, exercise_name)
+insert into public.exercises (id, user_id, phase_id, exercise_name, duration, notes)
 values (gen_random_uuid(), user_id,
-  (select id from public.phases where program_id in (select id from public.programs where day='Monday') and label='Main Strength'),
-  'Lat Pulldown – 3×10 @ 50kg');
+  (select id from public.phases where program_id in (select id from public.programs where day='Monday') and label='Strength Training'),
+  'Lat Pulldown (50kg)', 70, '10 reps, pause 1s at bottom');
 
-insert into public.exercises (id, user_id, phase_id, exercise_name)
+insert into public.exercises (id, user_id, phase_id, exercise_name, duration, notes)
 values (gen_random_uuid(), user_id,
-  (select id from public.phases where program_id in (select id from public.programs where day='Monday') and label='Main Strength'),
-  'Dumbbell Bench Press – 3×10 @ 12–14kg');
+  (select id from public.phases where program_id in (select id from public.programs where day='Monday') and label='Strength Training'),
+  'Dumbbell Bench Press (12-14kg per hand)', 80, '10 reps, maintain scapular retraction');
 
-insert into public.exercises (id, user_id, phase_id, exercise_name)
+insert into public.exercises (id, user_id, phase_id, exercise_name, duration, notes)
 values (gen_random_uuid(), user_id,
-  (select id from public.phases where program_id in (select id from public.programs where day='Monday') and label='Main Strength'),
-  'Cable Woodchop (High to Low) – 3×10/side @ 20–30kg');
+  (select id from public.phases where program_id in (select id from public.programs where day='Monday') and label='Strength Training'),
+  'Cable Woodchop High to Low (20-30kg)', 90, '10/side, use hips not arms');
 
-insert into public.exercises (id, user_id, phase_id, exercise_name)
+insert into public.exercises (id, user_id, phase_id, exercise_name, duration, notes)
 values (gen_random_uuid(), user_id,
-  (select id from public.phases where program_id in (select id from public.programs where day='Monday') and label='Main Strength'),
-  'Prone I-Y-T on Bench – 3×10 bodyweight or 1–2kg');
+  (select id from public.phases where program_id in (select id from public.programs where day='Monday') and label='Strength Training'),
+  'Prone I-Y-T on Bench', 100, '10 reps, bodyweight or 1-2kg, strict scapular control');
 
-insert into public.exercises (id, user_id, phase_id, exercise_name, notes)
+insert into public.exercises (id, user_id, phase_id, exercise_name, duration, notes)
 values (gen_random_uuid(), user_id,
-  (select id from public.phases where program_id in (select id from public.programs where day='Monday') and label='Main Strength'),
-  'Side Plank + Top Leg Raise – 3×10/side', 'Great for shoulder stability');
+  (select id from public.phases where program_id in (select id from public.programs where day='Monday') and label='Strength Training'),
+  'Side Plank + Top Leg Raise', 90, '10/side, hold 2s per rep, full hip lift');
 
 -- Cooldown Phase (from workouts.jsx)
 insert into public.phases (id, user_id, program_id, label, type, rest_between_exercise)
 values (gen_random_uuid(), user_id, (select id from public.programs where day='Monday'), 'Cooldown', 'linear', 10);
+-- Assign Monday phase positions: Warm-Up=1, Strength Training=2, Cooldown=3
+update public.phases set position = 1 where program_id in (select id from public.programs where day='Monday') and label='Warm-Up';
+update public.phases set position = 2 where program_id in (select id from public.programs where day='Monday') and label='Strength Training';
+update public.phases set position = 3 where program_id in (select id from public.programs where day='Monday') and label='Cooldown';
 
 insert into public.exercises (id, user_id, phase_id, exercise_name, duration)
 values (gen_random_uuid(), user_id,
@@ -95,47 +99,46 @@ values (gen_random_uuid(), user_id,
 -- THURSDAY: Posterior Chain & Core Control
 -- =====================================================================
 insert into public.programs (id, user_id, day, title, focus, rest_between_phase, is_template)
-values (gen_random_uuid(), user_id, 'Thursday', 'Posterior Chain & Core Control', 'Back side chain + glutes + core', 60, true);
+values (gen_random_uuid(), user_id, 'Thursday', 'Posterior Chain & Core', 'Back side chain + glutes + core', 60, true);
 
--- Superset A
+-- Superset Training (single phase with groups A and B)
 insert into public.phases (id, user_id, program_id, label, type, rest_between_sets)
-values (gen_random_uuid(), user_id, (select id from public.programs where day='Thursday'), 'Superset A', 'superset', 60);
+values (gen_random_uuid(), user_id, (select id from public.programs where day='Thursday'), 'Superset Training', 'superset', 75);
 
-insert into public.exercise_groups (id, user_id, phase_id, name, sets, rest_between_sets)
+insert into public.exercise_groups (id, user_id, phase_id, name, sets, rest_between_sets, rest_between_exercise)
 values (gen_random_uuid(), user_id,
-  (select id from public.phases where program_id in (select id from public.programs where day='Thursday') and label='Superset A'),
-  'Bulgarian Split Squat + Incline DB Chest Press', 3, 60);
+  (select id from public.phases where program_id in (select id from public.programs where day='Thursday') and label='Superset Training'),
+  'A', 4, 75, 15);
 
 insert into public.exercises (id, user_id, group_id, exercise_name)
 values (gen_random_uuid(), user_id,
-  (select id from public.exercise_groups where name='Bulgarian Split Squat + Incline DB Chest Press' and phase_id in
-    (select id from public.phases where program_id in (select id from public.programs where day='Thursday'))),
-  'Bulgarian Split Squat – 3×8–10/leg @ 12–16kg');
+  (select id from public.exercise_groups where name='A' and phase_id in
+    (select id from public.phases where program_id in (select id from public.programs where day='Thursday') and label='Superset Training')),
+  'Bulgarian Split Squat (12-16kg DBs)');
 
 insert into public.exercises (id, user_id, group_id, exercise_name)
 values (gen_random_uuid(), user_id,
-  (select id from public.exercise_groups where name='Bulgarian Split Squat + Incline DB Chest Press' and phase_id in
-    (select id from public.phases where program_id in (select id from public.programs where day='Thursday'))),
-  'Incline DB Chest Press – 3×8–10 @ 14kg DBs');
+  (select id from public.exercise_groups where name='A' and phase_id in
+    (select id from public.phases where program_id in (select id from public.programs where day='Thursday') and label='Superset Training')),
+  'Incline DB Chest Press (14kg DBs)');
 
--- Superset B
-insert into public.phases (id, user_id, program_id, label, type, rest_between_sets)
-values (gen_random_uuid(), user_id, (select id from public.programs where day='Thursday'), 'Superset B', 'superset', 75);
-
-insert into public.exercise_groups (id, user_id, phase_id, name, sets, rest_between_sets)
+-- Group B under the same Superset Training phase
+insert into public.exercise_groups (id, user_id, phase_id, name, sets, rest_between_sets, rest_between_exercise)
 values (gen_random_uuid(), user_id,
-  (select id from public.phases where program_id in (select id from public.programs where day='Thursday') and label='Superset B'),
-  'Farmer Carry + Pallof Press', 3, 75);
+  (select id from public.phases where program_id in (select id from public.programs where day='Thursday') and label='Superset Training'),
+  'B', 3, 75, 15);
 
 insert into public.exercises (id, user_id, group_id, exercise_name)
 values (gen_random_uuid(), user_id,
-  (select id from public.exercise_groups where name='Farmer Carry + Pallof Press'),
-  'Farmer Carry – 3×15–20m @ 20kg per hand');
+  (select id from public.exercise_groups where name='B' and phase_id in
+    (select id from public.phases where program_id in (select id from public.programs where day='Thursday') and label='Superset Training')),
+  'Farmer Carry (20kg per hand)');
 
 insert into public.exercises (id, user_id, group_id, exercise_name)
 values (gen_random_uuid(), user_id,
-  (select id from public.exercise_groups where name='Farmer Carry + Pallof Press'),
-  'Pallof Press – 3×10/side @ 15–20kg');
+  (select id from public.exercise_groups where name='B' and phase_id in
+    (select id from public.phases where program_id in (select id from public.programs where day='Thursday') and label='Superset Training')),
+  'Pallof Press Cable Anti-Rotation (15-20kg)');
 
 -- Thursday Warm-Up (from workouts.jsx)
 insert into public.phases (id, user_id, program_id, label, type, rest_between_exercise)
@@ -154,6 +157,10 @@ values (gen_random_uuid(), user_id,
 -- Thursday Cooldown (from workouts.jsx)
 insert into public.phases (id, user_id, program_id, label, type, rest_between_exercise)
 values (gen_random_uuid(), user_id, (select id from public.programs where day='Thursday'), 'Cooldown', 'linear', 10);
+-- Assign Thursday phase positions: Warm-Up=1, Superset Training=2, Cooldown=3
+update public.phases set position = 1 where program_id in (select id from public.programs where day='Thursday') and label='Warm-Up';
+update public.phases set position = 2 where program_id in (select id from public.programs where day='Thursday') and label='Superset Training';
+update public.phases set position = 3 where program_id in (select id from public.programs where day='Thursday') and label='Cooldown';
 
 insert into public.exercises (id, user_id, phase_id, exercise_name, duration)
 values (gen_random_uuid(), user_id,
@@ -188,45 +195,46 @@ values (gen_random_uuid(), user_id, 'Friday', 'Athletic Strength + Anti-Rotation
 
 -- Superset A
 insert into public.phases (id, user_id, program_id, label, type, rest_between_sets)
-values (gen_random_uuid(), user_id, (select id from public.programs where day='Friday'), 'Superset A', 'superset', 75);
+values (gen_random_uuid(), user_id, (select id from public.programs where day='Friday'), 'Power Superset', 'superset', 75);
 
-insert into public.exercise_groups (id, user_id, phase_id, name, sets, rest_between_sets)
+insert into public.exercise_groups (id, user_id, phase_id, name, sets, rest_between_sets, rest_between_exercise)
 values (gen_random_uuid(), user_id,
-  (select id from public.phases where program_id in (select id from public.programs where day='Friday') and label='Superset A'),
-  'Jump Squat + Pallof Press', 3, 75);
+  (select id from public.phases where program_id in (select id from public.programs where day='Friday') and label='Power Superset'),
+  'A', 3, 75, 15);
 
 insert into public.exercises (id, user_id, group_id, exercise_name, notes)
 values (gen_random_uuid(), user_id,
-  (select id from public.exercise_groups where name='Jump Squat + Pallof Press'),
+  (select id from public.exercise_groups where name='A' and phase_id in
+    (select id from public.phases where program_id in (select id from public.programs where day='Friday') and label='Power Superset')),
   'Dumbbell Jump Squat – 3×6 @ 8–10kg', 'Land softly, avoid forward torso pitch');
 
 insert into public.exercises (id, user_id, group_id, exercise_name, notes)
 values (gen_random_uuid(), user_id,
-  (select id from public.exercise_groups where name='Jump Squat + Pallof Press'),
+  (select id from public.exercise_groups where name='A' and phase_id in
+    (select id from public.phases where program_id in (select id from public.programs where day='Friday') and label='Power Superset')),
   'Pallof Press – 3×10/side @ 15–20kg', 'Exhale during press');
 
--- Rowing Phase
-insert into public.phases (id, user_id, program_id, label, type, rest_between_exercise)
-values (gen_random_uuid(), user_id, (select id from public.programs where day='Friday'), 'Rowing Phase', 'linear', 60);
+-- (Removed separate Rowing Phase; One-Arm DB Row is part of Strength Circuit below)
+
+-- Strength Circuit (matches workouts.jsx)
+insert into public.phases (id, user_id, program_id, label, type, rest_between_exercise, rounds, rest_between_rounds)
+values (gen_random_uuid(), user_id, (select id from public.programs where day='Friday'), 'Strength Circuit', 'circuit', 30, 3, 75);
 
 insert into public.exercises (id, user_id, phase_id, exercise_name, notes)
 values (gen_random_uuid(), user_id,
-  (select id from public.phases where label='Rowing Phase' and program_id in (select id from public.programs where day='Friday')),
-  'One-Arm DB Row – 3×10/side @ 14–20kg DB', 'Avoid torso twist, brace core');
-
--- Shoulder Phase
-insert into public.phases (id, user_id, program_id, label, type, rest_between_exercise)
-values (gen_random_uuid(), user_id, (select id from public.programs where day='Friday'), 'Shoulder Phase', 'circuit', 60);
-
-insert into public.exercises (id, user_id, phase_id, exercise_name, notes)
-values (gen_random_uuid(), user_id,
-  (select id from public.phases where label='Shoulder Phase' and program_id in (select id from public.programs where day='Friday')),
+  (select id from public.phases where label='Strength Circuit' and program_id in (select id from public.programs where day='Friday')),
   'Trap Raise – 3×12 @ 2–4kg DBs', 'Strict form, light weight for shoulder health');
 
 insert into public.exercises (id, user_id, phase_id, exercise_name, notes)
 values (gen_random_uuid(), user_id,
-  (select id from public.phases where label='Shoulder Phase' and program_id in (select id from public.programs where day='Friday')),
+  (select id from public.phases where label='Strength Circuit' and program_id in (select id from public.programs where day='Friday')),
   'TRX or Cable Face Pull – 3×12–15', 'Elbows at shoulder height, scapular squeeze');
+
+-- Add One-Arm DB Row into the Strength Circuit
+insert into public.exercises (id, user_id, phase_id, exercise_name, notes)
+values (gen_random_uuid(), user_id,
+  (select id from public.phases where label='Strength Circuit' and program_id in (select id from public.programs where day='Friday')),
+  'One-Arm DB Row – 3×10/side @ 14–20kg DB', 'Avoid torso twist, brace core');
 
 -- Friday Warm-Up (from workouts.jsx)
 insert into public.phases (id, user_id, program_id, label, type, rest_between_exercise)
@@ -245,6 +253,11 @@ values (gen_random_uuid(), user_id,
 -- Friday Cooldown (from workouts.jsx)
 insert into public.phases (id, user_id, program_id, label, type, rest_between_exercise)
 values (gen_random_uuid(), user_id, (select id from public.programs where day='Friday'), 'Cooldown', 'linear', 10);
+-- Assign Friday phase positions: Warm-Up=1, Power Superset=2, Strength Circuit=3, Cooldown=4
+update public.phases set position = 1 where program_id in (select id from public.programs where day='Friday') and label='Warm-Up';
+update public.phases set position = 2 where program_id in (select id from public.programs where day='Friday') and label='Power Superset';
+update public.phases set position = 3 where program_id in (select id from public.programs where day='Friday') and label='Strength Circuit';
+update public.phases set position = 4 where program_id in (select id from public.programs where day='Friday') and label='Cooldown';
 
 insert into public.exercises (id, user_id, phase_id, exercise_name, duration)
 values (gen_random_uuid(), user_id,
@@ -275,16 +288,16 @@ values (gen_random_uuid(), user_id,
 -- SUNDAY: Strength & Stability (same as Wednesday)
 -- =====================================================================
 insert into public.programs (id, user_id, day, title, focus, rest_between_phase, is_template)
-values (gen_random_uuid(), user_id, 'Sunday', 'Strength & Stability', 'Full-body strength + shoulder rehab', 60, true);
+values (gen_random_uuid(), user_id, 'Sunday', 'Full Body Strength', 'Functional strength and conditioning', 60, true);
 
 -- Warm-Up Phase
 insert into public.phases (id, user_id, program_id, label, type, rest_between_exercise)
-values (gen_random_uuid(), user_id, (select id from public.programs where day='Sunday'), 'Warm-Up', 'linear', 30);
+values (gen_random_uuid(), user_id, (select id from public.programs where day='Sunday'), 'Warm-Up', 'linear', 60);
 
 insert into public.exercises (id, user_id, phase_id, exercise_name, duration)
 values (gen_random_uuid(), user_id,
   (select id from public.phases where program_id in (select id from public.programs where day='Sunday') and label='Warm-Up'),
-  'Treadmill warm-up', 300);
+  'Jump rope', 300);
 
 -- Add remaining Sunday Warm-Up exercises (from workouts.jsx)
 insert into public.exercises (id, user_id, phase_id, exercise_name, duration)
@@ -312,10 +325,10 @@ insert into public.phases (id, user_id, program_id, label, type, rest_between_se
 values (gen_random_uuid(), user_id, (select id from public.programs where day='Sunday'), 'Strength', 'superset', 20);
 
 -- Group A
-insert into public.exercise_groups (id, user_id, phase_id, name, sets, rest_between_sets)
+insert into public.exercise_groups (id, user_id, phase_id, name, sets, rest_between_sets, rest_between_exercise)
 values (gen_random_uuid(), user_id,
   (select id from public.phases where program_id in (select id from public.programs where day='Sunday') and label='Strength'),
-  'A', 4, 20);
+  'A', 4, 20, 20);
 
 insert into public.exercises (id, user_id, group_id, exercise_name, duration)
 values (gen_random_uuid(), user_id,
@@ -330,10 +343,10 @@ values (gen_random_uuid(), user_id,
   'Bear Hug Galon Squat', 52);
 
 -- Group B
-insert into public.exercise_groups (id, user_id, phase_id, name, sets, rest_between_sets)
+insert into public.exercise_groups (id, user_id, phase_id, name, sets, rest_between_sets, rest_between_exercise)
 values (gen_random_uuid(), user_id,
   (select id from public.phases where program_id in (select id from public.programs where day='Sunday') and label='Strength'),
-  'B', 4, 20);
+  'B', 4, 20, 20);
 
 insert into public.exercises (id, user_id, group_id, exercise_name, duration)
 values (gen_random_uuid(), user_id,
@@ -348,10 +361,10 @@ values (gen_random_uuid(), user_id,
   'Hindu + Tyson Push-up', 50);
 
 -- Group C
-insert into public.exercise_groups (id, user_id, phase_id, name, sets, rest_between_sets)
+insert into public.exercise_groups (id, user_id, phase_id, name, sets, rest_between_sets, rest_between_exercise)
 values (gen_random_uuid(), user_id,
   (select id from public.phases where program_id in (select id from public.programs where day='Sunday') and label='Strength'),
-  'C', 3, 20);
+  'C', 3, 20, 20);
 
 insert into public.exercises (id, user_id, group_id, exercise_name, duration)
 values (gen_random_uuid(), user_id,
@@ -382,6 +395,11 @@ values (gen_random_uuid(), user_id,
 -- Sunday Cooldown
 insert into public.phases (id, user_id, program_id, label, type, rest_between_exercise)
 values (gen_random_uuid(), user_id, (select id from public.programs where day='Sunday'), 'Cooldown', 'linear', 20);
+-- Assign Sunday phase positions: Warm-Up=1, Strength=2, Finisher=3, Cooldown=4
+update public.phases set position = 1 where program_id in (select id from public.programs where day='Sunday') and label='Warm-Up';
+update public.phases set position = 2 where program_id in (select id from public.programs where day='Sunday') and label='Strength';
+update public.phases set position = 3 where program_id in (select id from public.programs where day='Sunday') and label='Finisher';
+update public.phases set position = 4 where program_id in (select id from public.programs where day='Sunday') and label='Cooldown';
 
 insert into public.exercises (id, user_id, phase_id, exercise_name, duration)
 values (gen_random_uuid(), user_id,
@@ -412,16 +430,16 @@ values (gen_random_uuid(), user_id,
 -- WEDNESDAY: Strength & Stability (same as Sunday)
 -- =====================================================================
 insert into public.programs (id, user_id, day, title, focus, rest_between_phase, is_template)
-values (gen_random_uuid(), user_id, 'Wednesday', 'Strength & Stability', 'Full-body strength + shoulder rehab', 60, true);
+values (gen_random_uuid(), user_id, 'Wednesday', 'Full Body Strength', 'Functional strength and conditioning', 60, true);
 
 -- Warm-Up Phase
 insert into public.phases (id, user_id, program_id, label, type, rest_between_exercise)
-values (gen_random_uuid(), user_id, (select id from public.programs where day='Wednesday'), 'Warm-Up', 'linear', 30);
+values (gen_random_uuid(), user_id, (select id from public.programs where day='Wednesday'), 'Warm-Up', 'linear', 60);
 
 insert into public.exercises (id, user_id, phase_id, exercise_name, duration)
 values (gen_random_uuid(), user_id,
   (select id from public.phases where program_id in (select id from public.programs where day='Wednesday') and label='Warm-Up'),
-  'Treadmill warm-up', 300);
+  'Jump rope', 300);
 
 -- Add remaining Wednesday Warm-Up exercises (from workouts.jsx)
 insert into public.exercises (id, user_id, phase_id, exercise_name, duration)
@@ -519,6 +537,11 @@ values (gen_random_uuid(), user_id,
 -- Wednesday Cooldown
 insert into public.phases (id, user_id, program_id, label, type, rest_between_exercise)
 values (gen_random_uuid(), user_id, (select id from public.programs where day='Wednesday'), 'Cooldown', 'linear', 20);
+-- Assign Wednesday phase positions: Warm-Up=1, Strength=2, Finisher=3, Cooldown=4
+update public.phases set position = 1 where program_id in (select id from public.programs where day='Wednesday') and label='Warm-Up';
+update public.phases set position = 2 where program_id in (select id from public.programs where day='Wednesday') and label='Strength';
+update public.phases set position = 3 where program_id in (select id from public.programs where day='Wednesday') and label='Finisher';
+update public.phases set position = 4 where program_id in (select id from public.programs where day='Wednesday') and label='Cooldown';
 
 insert into public.exercises (id, user_id, phase_id, exercise_name, duration)
 values (gen_random_uuid(), user_id,
