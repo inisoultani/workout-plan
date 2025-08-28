@@ -248,10 +248,10 @@ export default function ProgramEditor({ initialProgram, onSaveProgram }) {
       return;
     }
 
-    // exercise dragging: droppableId like `ex-<phaseId>-<groupId>`
+    // exercise dragging: droppableId like `ex|<phaseId>|<groupId>`
     if (type === "EXERCISE") {
-      const [, srcPhaseId, srcGroupId] = source.droppableId.split("ex-")[1].split("-");
-      const [, dstPhaseId, dstGroupId] = destination.droppableId.split("ex-")[1].split("-");
+      const [_, srcPhaseId, srcGroupId] = source.droppableId.split("|");
+      const [__, dstPhaseId, dstGroupId] = destination.droppableId.split("|");
 
       const srcPhase = program.phases.find((p) => p.id === srcPhaseId);
       const dstPhase = program.phases.find((p) => p.id === dstPhaseId);
@@ -275,10 +275,10 @@ export default function ProgramEditor({ initialProgram, onSaveProgram }) {
       return;
     }
 
-    // phase-level exercise dragging: droppableId like `pex-<phaseId>`
+    // phase-level exercise dragging: droppableId like `pex|<phaseId>`
     if (type === "PEXERCISE") {
-      const srcPhaseId = source.droppableId.split("pex-")[1];
-      const dstPhaseId = destination.droppableId.split("pex-")[1];
+      const srcPhaseId = source.droppableId.split("pex|")[1];
+      const dstPhaseId = destination.droppableId.split("pex|")[1];
       if (!srcPhaseId || !dstPhaseId || srcPhaseId !== dstPhaseId) return;
       const phase = program.phases.find((p) => p.id === srcPhaseId);
       if (!phase) return;
@@ -341,6 +341,7 @@ export default function ProgramEditor({ initialProgram, onSaveProgram }) {
                         <div className="flex-1">
                           <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-2">
+                              <span className="text-xs font-semibold text-slate-500">#{phaseIndex + 1}</span>
                               <Input value={phase.label} onChange={(e) => updatePhase(phase.id, { label: e.target.value })} className="font-semibold text-lg" />
                               <select value={phase.type} onChange={(e) => updatePhase(phase.id, { type: e.target.value })} className="border rounded px-2 py-1 text-sm">
                                 <option value="linear">Linear</option>
@@ -411,7 +412,10 @@ export default function ProgramEditor({ initialProgram, onSaveProgram }) {
                                             <div className="flex items-center gap-2">
                                               <div {...provGroup.dragHandleProps} className="p-1 cursor-grab"><GripVertical /></div>
                                               <div className="flex-1">
-                                                <Input value={group.name} onChange={(e) => updateGroup(phase.id, group.id, { name: e.target.value })} />
+                                                <div className="flex items-center gap-2">
+                                                  <span className="text-xs font-semibold text-slate-500">#{groupIndex + 1}</span>
+                                                  <Input value={group.name} onChange={(e) => updateGroup(phase.id, group.id, { name: e.target.value })} />
+                                                </div>
                                                 <div className="grid grid-cols-3 gap-2 text-xs mt-1 text-slate-600">
                                                   <div>Sets: <Input value={group.sets} onChange={(e) => updateGroup(phase.id, group.id, { sets: Number(e.target.value) })} className="inline w-20" /></div>
                                                   <div>RBS: <Input value={group.rest_between_sets ?? ""} onChange={(e) => updateGroup(phase.id, group.id, { rest_between_sets: e.target.value ? Number(e.target.value) : null })} className="inline w-24" /></div>
@@ -425,7 +429,7 @@ export default function ProgramEditor({ initialProgram, onSaveProgram }) {
                                             </div>
 
                                             <div className="mt-2">
-                                              <Droppable droppableId={`ex-${phase.id}-${group.id}`} type="EXERCISE">
+                                              <Droppable droppableId={`ex|${phase.id}|${group.id}`} type="EXERCISE">
                                                 {(provEx) => (
                                                   <div ref={provEx.innerRef} {...provEx.droppableProps} className="space-y-1">
                                                     {group.exercises.map((ex, exIndex) => (
@@ -438,7 +442,10 @@ export default function ProgramEditor({ initialProgram, onSaveProgram }) {
                                                           >
                                                             <div {...provExItem.dragHandleProps} className="p-1 cursor-grab"><GripVertical /></div>
                                                             <div className="flex-1">
-                                                              <Input value={ex.exercise_name} onChange={(e) => updateExercise(phase.id, group.id, ex.id, { exercise_name: e.target.value })} />
+                                                              <div className="flex items-center gap-2">
+                                                                <span className="text-xs font-semibold text-slate-500">#{exIndex + 1}</span>
+                                                                <Input value={ex.exercise_name} onChange={(e) => updateExercise(phase.id, group.id, ex.id, { exercise_name: e.target.value })} />
+                                                              </div>
                                                               <div className="text-xs mt-1 text-slate-600">Duration: <Input value={ex.duration || ""} onChange={(e) => updateExercise(phase.id, group.id, ex.id, { duration: e.target.value ? Number(e.target.value) : null })} className="inline w-20" /></div>
                                                             </div>
                                                             <div className="flex items-center gap-2">
@@ -462,7 +469,7 @@ export default function ProgramEditor({ initialProgram, onSaveProgram }) {
                                 )}
                               </Droppable>
                             ) : (
-                              <Droppable droppableId={`pex-${phase.id}`} type="PEXERCISE">
+                              <Droppable droppableId={`pex|${phase.id}`} type="PEXERCISE">
                                 {(provExPhase) => (
                                   <div ref={provExPhase.innerRef} {...provExPhase.droppableProps} className="space-y-2">
                                     {(phase.exercises || []).map((ex, exIndex) => (
@@ -475,7 +482,10 @@ export default function ProgramEditor({ initialProgram, onSaveProgram }) {
                                           >
                                             <div {...provExItem.dragHandleProps} className="p-1 cursor-grab"><GripVertical /></div>
                                             <div className="flex-1 space-y-1">
-                                              <Input value={ex.exercise_name} onChange={(e) => updateExercise(phase.id, null, ex.id, { exercise_name: e.target.value })} />
+                                              <div className="flex items-center gap-2">
+                                                <span className="text-xs font-semibold text-slate-500">#{exIndex + 1}</span>
+                                                <Input value={ex.exercise_name} onChange={(e) => updateExercise(phase.id, null, ex.id, { exercise_name: e.target.value })} />
+                                              </div>
                                               <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
                                                 <div>Duration: <Input value={ex.duration || ""} onChange={(e) => updateExercise(phase.id, null, ex.id, { duration: e.target.value ? Number(e.target.value) : null })} className="inline w-24" /></div>
                                                 <div className="col-span-2 sm:col-span-1 w-full">Notes:</div>
