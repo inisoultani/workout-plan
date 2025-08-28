@@ -1,5 +1,4 @@
 import { supabase } from "@/lib/supabaseClient";
-import { WorkoutPrograms } from "@/data/sources";
 import { useWorkoutProgramSelector } from "@/hooks/useWorkoutProgramSelector";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -42,6 +41,10 @@ export default function WorkoutSelector() {
     // Clear context and navigate
     setUser(null);
     navigate("/login");
+  }
+
+  function navigateToEditor() {
+    navigate("/editor");
   }
 
   return (
@@ -110,6 +113,10 @@ export default function WorkoutSelector() {
           ▶ Start Workout
         </button>
       )}
+
+      <button onClick={navigateToEditor} className="mt-6 bg-green-600 hover:bg-green-500 text-lg font-bold py-3 rounded-xl shadow-lg">
+        Edit Program
+      </button>
     </div>
   );
 }

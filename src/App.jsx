@@ -7,6 +7,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ResetPassword from "./pages/ResetPassword";
 import { AuthProvider } from "./components/AuthProvider";
 import { WorkoutStateProvider } from "./components/WorkoutStateProvider";
+import WorkoutEditor from "./pages/WorkoutEditor";
 
 function App() {
  
@@ -37,6 +38,15 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Editor screen */}
+          <Route path="/editor" element={
+             <ProtectedRoute>
+             <WorkoutStateProvider>
+               <WorkoutEditor />
+             </WorkoutStateProvider>
+           </ProtectedRoute>
+          } />
         </Routes>
       </Router>
     </AuthProvider>
