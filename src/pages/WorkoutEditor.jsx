@@ -1,44 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { Plus, Trash, GripVertical, Save } from "lucide-react";
+import { Plus, Trash, GripVertical, Save, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea as UITextarea } from "@/components/ui/textarea";
+import { useWorkoutState } from "@/context/WorkoutContext";
+import { useNavigate } from "react-router-dom";
 
-// Lightweight UI with improved coloring and focus states
-const Button = ({ children, className = "", variant = "primary", ...p }) => {
-  const variants = {
-    primary: "bg-slate-800 text-white hover:bg-slate-900",
-    secondary: "bg-slate-200 text-slate-900 hover:bg-slate-300",
-    success: "bg-green-600 text-white hover:bg-green-700",
-    warning: "bg-amber-500 text-white hover:bg-amber-600",
-    danger: "bg-red-600 text-white hover:bg-red-700",
-    ghost: "bg-transparent text-slate-700 hover:bg-slate-100",
-  };
-  return (
-    <button
-      {...p}
-      className={`inline-flex items-center gap-2 px-3 py-1 rounded-md shadow-sm text-sm font-medium transition-colors ${
-        variants[variant] || variants.primary
-      } ${className}`}
-    >
-      {children}
-    </button>
-  );
+// Map previous custom variants to shared Button variants via className helpers
+const variantMap = {
+  primary: "",
+  secondary: "variant-secondary",
+  success: "bg-green-600 hover:bg-green-700 text-white",
+  warning: "bg-amber-500 hover:bg-amber-600 text-white",
+  danger: "variant-destructive",
 };
-const Input = (p) => (
-  <input
-    {...p}
-    className={`border border-slate-300 rounded-md px-2 py-1 text-sm bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition ${
-      p.className || "w-full"
-    }`}
-  />
-);
-const TextArea = (p) => (
-  <textarea
-    {...p}
-    className={`border border-slate-300 rounded-md px-2 py-1 text-sm bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 transition ${
-      p.className || "w-full"
-    }`}
-  />
-);
+const mapVariant = (v) => (v === "danger" ? { variant: "destructive", className: "" } : v === "secondary" ? { variant: "secondary", className: "" } : { variant: "default", className: variantMap[v] || "" });
+const TextArea = (props) => <UITextarea {...props} />;
 
 function getPhaseTheme(phase) {
   const label = (phase.label || "").toLowerCase();
@@ -72,13 +50,15 @@ function move(source, destination, sourceIdx, destIdx) {
   return { source: src, destination: dst };
 }
 
-export default function ProgramEditor({ initialProgram, onSaveProgram }) {
+export default function WorkoutEditor({ onSaveProgram }) {
+  const state = useWorkoutState();
+  const navigate = useNavigate();
   const [program, setProgram] = useState(
-    initialProgram || {
+    state.program || {
       title: "",
       day: "",
       focus: "",
-      rest_between_phase: null,
+      restBetweenPhase: null,
       is_template: false,
       archived_at: null,
       phases: [],
@@ -88,8 +68,8 @@ export default function ProgramEditor({ initialProgram, onSaveProgram }) {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    if (initialProgram) setProgram(initialProgram);
-  }, [initialProgram]);
+    if (state.program) setProgram(state.program);
+  }, [state.program]);
 
   // Phase CRUD
   function addPhase() {
@@ -97,10 +77,10 @@ export default function ProgramEditor({ initialProgram, onSaveProgram }) {
       id: uid(),
       label: "New Phase",
       type: "linear",
-      rest_between_exercise: null,
-      rest_between_sets: null,
+      restBetweenExercise: null,
+      restBetweenSets: null,
       rounds: null,
-      rest_between_rounds: null,
+      restBetweenRounds: null,
       position: program.phases.length,
       exercises: [],
       groups: [],
@@ -127,8 +107,8 @@ export default function ProgramEditor({ initialProgram, onSaveProgram }) {
       id: uid(),
       name: "New Group",
       sets: 3,
-      rest_between_sets: null,
-      rest_between_exercise: null,
+      restBetweenSets: null,
+      restBetweenExercise: null,
       position: 0,
       exercises: [],
     };
@@ -158,7 +138,7 @@ export default function ProgramEditor({ initialProgram, onSaveProgram }) {
   function addExercise(phaseId, groupId) {
     const ex = {
       id: uid(),
-      exercise_name: "New Exercise",
+      name: "New Exercise",
       duration: null,
       notes: "",
       position: 0,
@@ -303,12 +283,15 @@ export default function ProgramEditor({ initialProgram, onSaveProgram }) {
   return (
     <div className="min-h-screen bg-black text-white p-4">
       <div className="mb-4 space-y-3">
+      <div className="flex items-center gap-3">
+          <Button onClick={() => {navigate('/')}} className="md:col-span-1"><ArrowLeft /> Back</Button>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <Input placeholder="Program Title" value={program.title} onChange={(e) => setProgram({ ...program, title: e.target.value })} className="md:col-span-2" />
           <Input placeholder="Day (e.g. Monday)" value={program.day} onChange={(e) => setProgram({ ...program, day: e.target.value })} />
           <label className="flex items-center gap-2 text-sm text-slate-300">
             RBP
-            <Input type="number" value={program.rest_between_phase ?? ""} onChange={(e) => setProgram({ ...program, rest_between_phase: e.target.value ? Number(e.target.value) : null })} className="w-28" />
+            <Input type="number" value={program.restBetweenPhase ?? ""} onChange={(e) => setProgram({ ...program, restBetweenPhase: e.target.value ? Number(e.target.value) : null })} className="w-28" />
           </label>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
@@ -319,8 +302,8 @@ export default function ProgramEditor({ initialProgram, onSaveProgram }) {
           </label>
         </div>
         <div className="flex items-center gap-3">
-          <Button onClick={addPhase} variant="primary"><Plus /> Add Phase</Button>
-          <Button onClick={saveProgram} variant="success" disabled={isSaving}><Save /> {isSaving ? 'Saving...' : 'Save'}</Button>
+          {(() => { const { variant, className } = mapVariant('primary'); return <Button onClick={addPhase} variant={variant} className={className}><Plus /> Add Phase</Button>; })()}
+          {(() => { const { variant, className } = mapVariant('success'); return <Button onClick={saveProgram} variant={variant} className={className} disabled={isSaving}><Save /> {isSaving ? 'Saving...' : 'Save'}</Button>; })()}
         </div>
       </div>
 
@@ -354,13 +337,9 @@ export default function ProgramEditor({ initialProgram, onSaveProgram }) {
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              {phase.type === 'superset' && (
-                                <Button variant="warning" onClick={() => addGroup(phase.id)}><Plus /> Group</Button>
-                              )}
-                              {phase.type !== 'superset' && (
-                                <Button variant="primary" onClick={() => addExercise(phase.id)}><Plus /> Add Exercise</Button>
-                              )}
-                              <Button variant="danger" onClick={() => deletePhase(phase.id)}><Trash /></Button>
+                              {phase.type === 'superset' && (() => { const { variant, className } = mapVariant('warning'); return <Button variant={variant} className={className} onClick={() => addGroup(phase.id)}><Plus /> Group</Button>; })()}
+                              {phase.type !== 'superset' && (() => { const { variant, className } = mapVariant('primary'); return <Button variant={variant} className={className} onClick={() => addExercise(phase.id)}><Plus /> Add Exercise</Button>; })()}
+                              {(() => { const { variant, className } = mapVariant('danger'); return <Button variant={variant} className={className} onClick={() => deletePhase(phase.id)}><Trash /></Button>; })()}
                             </div>
                           </div>
 
@@ -369,16 +348,16 @@ export default function ProgramEditor({ initialProgram, onSaveProgram }) {
                             <label className="flex items-center gap-2">RBE
                               <Input
                                 type="number"
-                                value={phase.rest_between_exercise ?? ""}
-                                onChange={(e) => updatePhase(phase.id, { rest_between_exercise: e.target.value ? Number(e.target.value) : null })}
+                                value={phase.restBetweenExercise ?? ""}
+                                onChange={(e) => updatePhase(phase.id, { restBetweenExercise: e.target.value ? Number(e.target.value) : null })}
                                 className="w-24"
                               />
                             </label>
                             <label className="flex items-center gap-2">RBS
                               <Input
                                 type="number"
-                                value={phase.rest_between_sets ?? ""}
-                                onChange={(e) => updatePhase(phase.id, { rest_between_sets: e.target.value ? Number(e.target.value) : null })}
+                                value={phase.restBetweenSets ?? ""}
+                                onChange={(e) => updatePhase(phase.id, { restBetweenSets: e.target.value ? Number(e.target.value) : null })}
                                 className="w-24"
                               />
                             </label>
@@ -393,8 +372,8 @@ export default function ProgramEditor({ initialProgram, onSaveProgram }) {
                             <label className="flex items-center gap-2">RBR
                               <Input
                                 type="number"
-                                value={phase.rest_between_rounds ?? ""}
-                                onChange={(e) => updatePhase(phase.id, { rest_between_rounds: e.target.value ? Number(e.target.value) : null })}
+                                value={phase.restBetweenRounds ?? ""}
+                                onChange={(e) => updatePhase(phase.id, { restBetweenRounds: e.target.value ? Number(e.target.value) : null })}
                                 className="w-24"
                               />
                             </label>
@@ -418,13 +397,13 @@ export default function ProgramEditor({ initialProgram, onSaveProgram }) {
                                                 </div>
                                                 <div className="grid grid-cols-3 gap-2 text-xs mt-1 text-slate-600">
                                                   <div>Sets: <Input value={group.sets} onChange={(e) => updateGroup(phase.id, group.id, { sets: Number(e.target.value) })} className="inline w-20" /></div>
-                                                  <div>RBS: <Input value={group.rest_between_sets ?? ""} onChange={(e) => updateGroup(phase.id, group.id, { rest_between_sets: e.target.value ? Number(e.target.value) : null })} className="inline w-24" /></div>
-                                                  <div>RBE: <Input value={group.rest_between_exercise ?? ""} onChange={(e) => updateGroup(phase.id, group.id, { rest_between_exercise: e.target.value ? Number(e.target.value) : null })} className="inline w-24" /></div>
+                                                  <div>RBS: <Input value={group.restBetweenSets ?? ""} onChange={(e) => updateGroup(phase.id, group.id, { restBetweenSets: e.target.value ? Number(e.target.value) : null })} className="inline w-24" /></div>
+                                                  <div>RBE: <Input value={group.restBetweenExercise ?? ""} onChange={(e) => updateGroup(phase.id, group.id, { restBetweenExercise: e.target.value ? Number(e.target.value) : null })} className="inline w-24" /></div>
                                                 </div>
                                               </div>
                                               <div className="flex items-center gap-2">
-                                                <Button variant="primary" onClick={() => addExercise(phase.id, group.id)}><Plus /> Add Exercise</Button>
-                                                <Button variant="danger" onClick={() => deleteGroup(phase.id, group.id)}><Trash /></Button>
+                                                {(() => { const { variant, className } = mapVariant('primary'); return <Button variant={variant} className={className} onClick={() => addExercise(phase.id, group.id)}><Plus /> Add Exercise</Button>; })()}
+                                                {(() => { const { variant, className } = mapVariant('danger'); return <Button variant={variant} className={className} onClick={() => deleteGroup(phase.id, group.id)}><Trash /></Button>; })()}
                                               </div>
                                             </div>
 
@@ -444,12 +423,12 @@ export default function ProgramEditor({ initialProgram, onSaveProgram }) {
                                                             <div className="flex-1">
                                                               <div className="flex items-center gap-2">
                                                                 <span className="text-xs font-semibold text-slate-500">#{exIndex + 1}</span>
-                                                                <Input value={ex.exercise_name} onChange={(e) => updateExercise(phase.id, group.id, ex.id, { exercise_name: e.target.value })} />
+                                                                <Input value={ex.name} onChange={(e) => updateExercise(phase.id, group.id, ex.id, { name: e.target.value })} />
                                                               </div>
                                                               <div className="text-xs mt-1 text-slate-600">Duration: <Input value={ex.duration || ""} onChange={(e) => updateExercise(phase.id, group.id, ex.id, { duration: e.target.value ? Number(e.target.value) : null })} className="inline w-20" /></div>
                                                             </div>
                                                             <div className="flex items-center gap-2">
-                                                              <Button onClick={() => deleteExercise(phase.id, group.id, ex.id)} variant="danger"><Trash /></Button>
+                                                              {(() => { const { variant, className } = mapVariant('danger'); return <Button onClick={() => deleteExercise(phase.id, group.id, ex.id)} variant={variant} className={className}><Trash /></Button>; })()}
                                                             </div>
                                                           </div>
                                                         )}
@@ -484,7 +463,7 @@ export default function ProgramEditor({ initialProgram, onSaveProgram }) {
                                             <div className="flex-1 space-y-1">
                                               <div className="flex items-center gap-2">
                                                 <span className="text-xs font-semibold text-slate-500">#{exIndex + 1}</span>
-                                                <Input value={ex.exercise_name} onChange={(e) => updateExercise(phase.id, null, ex.id, { exercise_name: e.target.value })} />
+                                                <Input value={ex.name} onChange={(e) => updateExercise(phase.id, null, ex.id, { name: e.target.value })} />
                                               </div>
                                               <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
                                                 <div>Duration: <Input value={ex.duration || ""} onChange={(e) => updateExercise(phase.id, null, ex.id, { duration: e.target.value ? Number(e.target.value) : null })} className="inline w-24" /></div>
@@ -493,7 +472,7 @@ export default function ProgramEditor({ initialProgram, onSaveProgram }) {
                                               <TextArea value={ex.notes || ""} onChange={(e) => updateExercise(phase.id, null, ex.id, { notes: e.target.value })} />
                                             </div>
                                             <div className="flex items-center gap-2">
-                                              <Button onClick={() => deleteExercise(phase.id, null, ex.id)} variant="danger"><Trash /></Button>
+                                              {(() => { const { variant, className } = mapVariant('danger'); return <Button onClick={() => deleteExercise(phase.id, null, ex.id)} variant={variant} className={className}><Trash /></Button>; })()}
                                             </div>
                                           </div>
                                         )}

@@ -59,11 +59,13 @@ function mapProgramsToLocalShape(rows) {
           label: ph.label,
           type: 'superset',
           groups: (ph.exercise_groups || []).map(g => ({
+            id: g.id,
             name: g.name,
             sets: g.sets ?? undefined,
             restBetweenSets: g.rest_between_sets ?? undefined,
             restBetweenExercise: g.rest_between_exercise ?? undefined,
             exercises: (g.exercises || []).map(ex => ({
+              id: ex.id,
               name: ex.exercise_name,
               duration: ex.duration ?? undefined,
               notes: ex.notes ?? undefined,
@@ -74,11 +76,13 @@ function mapProgramsToLocalShape(rows) {
       return {
         label: ph.label,
         type: ph.type, // 'linear' | 'circuit'
+        id: ph.id,
         restBetweenExercise: ph.rest_between_exercise ?? undefined,
         restBetweenSets: ph.rest_between_sets ?? undefined,
         rounds: ph.rounds ?? undefined,
         restBetweenRounds: ph.rest_between_rounds ?? undefined,
         exercises: (ph.exercises || []).map(ex => ({
+          id: ex.id,
           name: ex.exercise_name,
           duration: ex.duration ?? undefined,
           notes: ex.notes ?? undefined,
